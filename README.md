@@ -1,3 +1,55 @@
+# Track1 · Day 21 — Capstone AI Evaluation · VLearn AI Tutor
+
+**Người nộp:** Tuấn Anh · **Nhóm:** Chi · Hiếu · Tuấn Anh
+**Sản phẩm được đánh giá:** VLearn AI Tutor — trợ giảng RAG, tool-calling `kb_search` trên corpus 18 tài liệu, output JSON `{scope, answer, sources, followup_questions}`.
+
+## Verdict tóm tắt
+
+> ### HOLD — chưa ship
+>
+> 3/4 tiêu chí blocker trượt. Tutor giữ kỷ luật phạm vi rất tốt (chặn được cả bẫy hỏi giá API lẫn prompt injection, 20/20 `schema_valid`) nhưng **không đáng tin ở khâu trích nguồn** — 1 lần cite section không tồn tại, 1 lần dịch quote rồi gọi đó là nguyên văn, 7/20 quote không khớp section. Với sản phẩm mà toàn bộ giá trị nằm ở *"tôi chỉ trả lời từ tài liệu khoá học"*, đây là lỗi phá vỡ lời hứa cốt lõi.
+
+| | |
+|---|---|
+| Dataset | 20 scenario, lưới 4 nhóm user × 5 intent, phủ 15/20 ô |
+| Nhãn người | 2 vòng chấm độc lập · đồng thuận **55%** · nhãn vàng 14 pass / 4 fail / 2 uncertain |
+| LLM judge | 2 vòng calibration · agreement **65%** · nhận đúng 86% output tốt nhưng **chỉ bắt 25% output xấu** |
+| Chi phí 1 vòng eval | **$0,019** · 98 giây · 110k token |
+
+**Phát hiện trung tâm:** judge **mù với lỗi trích nguồn** vì nó chỉ nhìn thấy chuỗi ký tự trong `sources`, không có quyền truy cập corpus để đối chiếu — không prompt nào sửa được. Trong khi đó `citation_exists`, một code check ~10 dòng chạy với $0, bắt lỗi đó ngay. Đây là căn cứ cho quyết định routing: **tuyệt đối không giao kiểm tra tồn tại nguồn cho LLM judge.**
+
+## Đóng góp của tôi (Tuấn Anh)
+
+- Dựng khung làm việc chống conflict cho 3 người: [SPRINT-PLAN.md](SPRINT-PLAN.md), [TEAM-BRIEFS.md](TEAM-BRIEFS.md), [deliverables/_parts/](deliverables/_parts/) (tách 7 mục REPORT thành 7 file có chủ sở hữu), [assemble_report.py](assemble_report.py).
+- Thiết kế Input Grid + sinh [dataset-v1.jsonl](deliverables/evidence/dataset-v1.jsonl) 20 scenario; kiểm đề offline bằng `retrieve_corpus()` trước khi tốn API (14/14 câu có slide truy đúng nguồn).
+- Chạy pipeline, gán nhãn độc lập ([labels-tuananh.csv](deliverables/evidence/labels-tuananh.csv)), dựng nhãn vàng, đo lại judge trên nhãn vàng.
+- Viết mục 1, 2, 6, 7 của REPORT; ghép REPORT hoàn chỉnh.
+- Vá `tutor/tutor.py`: fallback pre-retrieve khi endpoint không hỗ trợ tool-calling (`ToolsUnsupported` + `answer_pre_retrieved`), giữ nguyên contract để downstream không đổi.
+- Dựng [slides/](slides/) — deck 13 slide sinh tự động từ evidence.
+
+**Hiếu:** rubric + routing (mục 3, 4), 2 vòng calibrate judge (mục 5), 2 code check mới, `results-v1` chạy agentic thật.
+**Chi:** thiết kế coverage cho dataset (bận nửa cuối buổi; phần slides và review dataset do Tuấn Anh nhận lại).
+
+## Đường vào bài nộp
+
+| Cần xem gì | Ở đâu |
+|---|---|
+| Report 7 mục A→Z | [deliverables/REPORT.md](deliverables/REPORT.md) |
+| Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 15 file |
+| Slides thuyết trình | [slides/index.html](slides/index.html) — mở bằng double-click, phím ← → |
+| Dùng AI ở đâu, AI sai ở đâu | [deliverables/ai-support-log.md](deliverables/ai-support-log.md) |
+
+### Hạn chế đã biết, nói thẳng
+
+1. **Judge trùng model với tutor** (đều `gpt-4o-mini`) — hạ tầng nhóm chỉ có một model khả dụng. Vi phạm nguyên tắc "judge phải khác tutor"; mọi số liệu judge phải đọc kèm cảnh báo tự chấm chéo.
+2. **Chỉ 2 vòng chấm độc lập thay vì 3** — Chi bận nửa cuối buổi.
+3. **Chưa gắn tracing Braintrust/LangSmith.** Nhóm không kịp lấy API key trong buổi. Code đã sẵn sàng (`eval/tracing.py` tự nhận backend), chỉ thiếu key.
+4. **n = 20 là quá nhỏ** để tin từng con số phần trăm — một case đổi nhãn là pass rate nhảy 5%.
+
+---
+
+# Hướng dẫn repo gốc (eval-kit)
+
 # K3 Track 1 · Day 20–21 — AI Evaluation (eval-kit)
 
 Repo làm bài capstone **AI Evaluation** của case **VLearn AI Tutor** — trợ giảng trả lời
