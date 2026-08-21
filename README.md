@@ -68,7 +68,7 @@ Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); 
 | Cần xem gì | Ở đâu |
 |---|---|
 | Report 7 mục A→Z | [deliverables/REPORT.md](deliverables/REPORT.md) |
-| Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 19 file |
+| Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 20 file |
 | Slides thuyết trình | [slides/index.html](slides/index.html) — mở bằng double-click, phím ← → |
 | Kịch bản nói | [slides/speaker-notes.md](slides/speaker-notes.md) |
 | Dùng AI ở đâu, AI sai ở đâu | `ai-support-log-<tên>.md` ở thư mục gốc |
