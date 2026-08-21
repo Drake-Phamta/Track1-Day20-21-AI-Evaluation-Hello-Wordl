@@ -2,8 +2,8 @@
 **Thư mục bài nộp:** `Track1_Day21_01154_NguyenMinhHieu`
 
 ## 1. Thông tin cá nhân và nhóm
-- **Họ và tên:** Nguyễn Minh Hiếu (MHV: 01154)
-- **Nhóm:** Nhóm VLearn AI Tutor (Chi, Hiếu, Tuấn Anh)
+- **Họ và tên:** Nguyễn Minh Hiếu (MHV: 2A202601154)
+- **Nhóm:** Nhóm Hello World (Chi, Hiếu, Tuấn Anh)
 
 ## 2. Đóng góp của tôi
 - Phụ trách **Mục 3 (Rubric) và Mục 4 (Routing Map)**: Thiết kế rubric 5 tiêu chí và bảng routing phân loại việc nào cho code check, việc nào cho LLM judge, việc nào cho human.

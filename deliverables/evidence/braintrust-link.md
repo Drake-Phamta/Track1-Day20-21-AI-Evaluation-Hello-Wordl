@@ -6,10 +6,8 @@ Dataset: `dataset-v1.jsonl` (20 scenarios)
 
 ## Link project Braintrust
 
-<!-- Điền link vào đây sau khi chạy python eval/run_eval.py với BRAINTRUST_API_KEY -->
-> **TODO:** Chạy bước dưới rồi paste link vào đây.
 
-**Project URL:** https://www.braintrust.dev/app/[org]/p/ai-evaluation
+**Project URL:** https://www.braintrust.dev/app/HieuNM05/p/ai-evaluation
 
 ---
 
