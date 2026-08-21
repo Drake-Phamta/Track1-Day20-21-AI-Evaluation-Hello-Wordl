@@ -1,0 +1,8 @@
+﻿Ghi 20 verdict vào verdicts.jsonl
+
+Confusion matrix (hàng = judge, cột = nhãn người):
+           |      pass      fail uncertain
+      pass |        12         3         2
+      fail |         2         1         0
+ uncertain |         0         0         0
+Agreement: 13/20 = 65%
