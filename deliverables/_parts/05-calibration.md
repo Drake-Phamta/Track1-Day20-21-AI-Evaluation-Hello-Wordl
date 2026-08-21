@@ -148,3 +148,23 @@ Agreement: 14/20 = 70%
 | **scope_correct (câu mơ hồ, deixis)** | ❌ Không | — | Judge luôn phán pass, không uncertain |
 | **pedagogy** | ❌ Không — không có trong prompt | — | Giữ cho người chấm |
 | **adversarial behavior** | ❌ Không | — | Người chấm bắt buộc |
+
+---
+
+### ⚠️ Đính chính: giới hạn của bộ nhãn và kết luận cũ
+
+**Kết luận trước đây:** "judge không bỏ sót lỗi in-scope" — cần đọc đính chính này trước khi dùng số liệu đó.
+
+**Vấn đề:** `labels-hieu.csv` gán nhãn `pass` cho **tất cả 12 case in-scope** vì output tutor thực tế đều đạt tiêu chí rubric. Không có case in-scope nào được label `fail`.
+
+**Hệ quả:** Agreement 70% (14/20) chỉ đo được:
+- ✅ Judge **không fail oan** case tutor làm đúng (precision tốt)
+- ❌ Không đo được judge **có bắt được lỗi thật không** (recall chưa đo được)
+
+Nói cách khác: confusion matrix của chúng tôi **không có true positive hay false negative** nào ở chiều "lỗi in-scope" — vì bộ nhãn vàng không có lỗi in-scope nào.
+
+**Nguyên nhân hệ thống:** Tutor gpt-4o-mini trên dataset 20 câu này có pass rate code_checks cao (100% schema, 95% citation_exists) — hầu hết lỗi là `quote_verbatim` (7/20 fail) mà judge_prompt hiện tại không kiểm tra riêng tiêu chí này.
+
+**Bước tiếp theo để đo recall thật:**
+1. **Inject synthetic bad outputs:** Lấy 5–10 row từ results-v1.jsonl, sửa tay để tạo lỗi groundedness rõ ràng → label fail → chạy judge → đo recall.
+2. **Hoặc chờ trace production:** Khi deploy cho học viên thật, sample 10%/tuần và gán nhãn ngẫu nhiên.
