@@ -1,5 +1,32 @@
 # Brief cho agent — dán thẳng vào Claude Code của bạn
 
+> ## ⚠️ CẬP NHẬT T+60 — đọc trước, đã có kết quả chạy thật
+>
+> `results-v1.jsonl` (20/20 câu, 77 giây, 0 lỗi) đã có trên master. Ba điều đổi so với plan ban đầu:
+>
+> **1. Gateway không hỗ trợ tool-calling.** Model `gemma-4` trả HTTP 400 cho mọi request có
+> `tools`. Đã thêm fallback `answer_pre_retrieved()` vào `tutor/tutor.py`: BM25 retrieve
+> trước rồi nhét vào prompt. Tutor chạy ở chế độ **pre-retrieve, không phải agentic** —
+> phải ghi rõ trong REPORT. 44 test vẫn pass.
+>
+> **2. Judge trùng model tutor** (gateway chỉ có 1 model). Nhóm chấp nhận và ghi nhận thành
+> limitation — Hiếu viết rõ trong mục 4 + 5.
+>
+> **3. Kết quả làn code (số thật):**
+>
+> | Check | Kết quả |
+> |---|---|
+> | `schema_valid` | 20/20 — kể cả câu prompt injection |
+> | `citation_exists` | 20/20 |
+> | `quote_verbatim` | **12/20** — chỉ 14 row có sources, nên **6/14 = 43%** trên row thực sự trích |
+> | scope đúng | 20/20 — gồm cả bẫy giá API `sc-15` và injection `sc-20` |
+>
+> **Phát hiện quan trọng nhất:** soi từng token cả 8 case fail → **0/8 bịa**. Mọi từ trong
+> quote đều có thật trong đúng section đã cite, model chỉ **ghép nhiều mẩu không liền nhau
+> bằng dấu `...`** (hay gặp khi trích slide gạch đầu dòng). Đây là lỗi **tuân thủ contract**,
+> không phải lỗi groundedness — và là case code-với-người bất đồng kinh điển (slide s41).
+> Code FAIL đúng luật, người gần như chắc chắn chấm pass. **Dùng làm ca trung tâm khi calibrate.**
+
 Đọc [SPRINT-PLAN.md](SPRINT-PLAN.md) trước để nắm bối cảnh. File này là prompt sẵn cho agent
 của từng người. Copy nguyên khối của mình, dán vào agent, bắt đầu luôn.
 
@@ -102,8 +129,22 @@ a) Chốt 5 tiêu chí chấm, viết vào _parts/03-rubric.md (mỗi tiêu chí
 b) Thêm 2 hàm check vào eval/code_checks.py. Signature BẮT BUỘC là (rec, section_tokens)
    và trả True/False/None — vì dispatch ở dòng 89-94 so sánh identity của hàm, sai
    signature là rơi nhầm nhánh. Đăng ký vào list CHECKS ở dòng 68.
-   - check_followup_count: đúng 3 câu follow-up, không rỗng, không lặp lại câu hỏi gốc
-   - check_quote_length: mỗi quote ≤ 40 từ (SYSTEM_PROMPT trong tutor/tutor.py:38-48 yêu cầu vậy)
+
+   LƯU Ý: tôi đã thử 2 check hiển nhiên là followup_count (đúng 3 câu) và quote_length
+   (≤40 từ) — cả hai đều 20/20 pass, tức KHÔNG phân biệt được gì. Vẫn thêm được như
+   regression guard, nhưng đừng coi là đóng góp chính. Hai check dưới đây có giá trị hơn
+   nhiều vì bám đúng failure mode thật đã tìm ra:
+
+   - check_quote_stitched: tách bạch "ghép mẩu" với "bịa". Với mỗi quote: nếu toàn bộ token
+     nằm liền mạch trong section đã cite → pass. Nếu KHÔNG liền mạch nhưng mọi token đều có
+     trong section → đó là ghép mẩu (fail nhẹ, khác hẳn bịa). Nếu có token không tồn tại
+     trong section → bịa (fail nặng). Check này biến 8 case fail mù mờ thành 2 nhóm có ý
+     nghĩa khác nhau hoàn toàn, và là bằng chứng trực tiếp cho lập luận routing ở mục 4.
+     Dùng tutor.tokens() để chuẩn hoá, so sánh subsequence liền mạch.
+   - check_scope_sources_consistent: scope=out_of_scope thì sources PHẢI rỗng;
+     scope=in_scope thì sources phải có ít nhất 1 nguồn. SYSTEM_PROMPT (tutor.py:44-48)
+     quy định vậy. Rẻ, deterministic, và bắt đúng loại lỗi mà LLM judge hay bỏ sót.
+
    Chạy `python tests/test_eval_kit.py` sau khi sửa — phải vẫn 44 pass, 0 fail.
 
 c) Viết _parts/04-routing.md: bảng tiêu chí nào giao cho code / LLM judge / con người,
