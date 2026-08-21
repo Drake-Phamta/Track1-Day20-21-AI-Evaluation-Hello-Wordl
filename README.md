@@ -41,7 +41,7 @@ Ba mục dưới đây **không phải lỗi ai làm sai** — chúng là nhữn
 
 3. **Một cấu hình bị bó buộc cho điểm eval đẹp hơn mà không hề tốt hơn** — đây là *cái bẫy diễn giải số liệu mà nhóm suýt sập*. Bản chạy pre-retrieve đạt `citation_exists` 20/20, "tốt hơn" bản agentic 19/20. Nhưng nó không có *cơ hội* bịa nguồn vì bị ép dùng đúng những section code đã lấy sẵn. Trước khi mừng vì pass rate tăng, phải hỏi: phiên bản mới có cơ hội mắc lỗi đó không?
 
-## Đóng góp
+## Phân công trong nhóm
 
 | Thành viên | Vai | Phụ trách |
 |---|---|---|
