@@ -1,4 +1,4 @@
-<!-- OWNER: Hieu -- chi Hieu duoc sua file nay. Ghep vao REPORT.md o T+125. -->
+<!-- OWNER: Hieu -->
 
 ## 5. Calibration Report
 
@@ -148,3 +148,76 @@ Agreement: 14/20 = 70%
 | **scope_correct (câu mơ hồ, deixis)** | ❌ Không | — | Judge luôn phán pass, không uncertain |
 | **pedagogy** | ❌ Không — không có trong prompt | — | Giữ cho người chấm |
 | **adversarial behavior** | ❌ Không | — | Người chấm bắt buộc |
+
+---
+
+## Bổ sung sau khi có đủ ba vòng chấm
+
+Phần phân tích ở trên đo judge so với **`labels-hieu.csv`** — bộ nhãn của một người chấm.
+Sau khi có đủ ba vòng chấm độc lập và một nhãn vàng, hai con số cần được đính chính.
+
+### Đồng thuận giữa những người chấm
+
+`python eval/agreement.py` trên ba file (`evidence/agreement-3way.txt`):
+
+| Cặp | Đồng thuận |
+|---|---|
+| **Cả ba cùng nhãn** | **10/20 = 50%** |
+| Chi ↔ Tuấn Anh | 17/20 = 85% |
+| Hiếu ↔ Tuấn Anh | 11/20 = 55% |
+| Chi ↔ Hiếu | 10/20 = 50% |
+
+Phân bố nhãn cho thấy ba người có ba mức khắt khe khác nhau:
+
+| Người chấm | pass | fail | uncertain |
+|---|---|---|---|
+| Hiếu | 16 | **0** | 4 |
+| Tuấn Anh | 14 | 4 | 2 |
+| Chi | 13 | 6 | 1 |
+
+**Nhãn vàng được củng cố, không phải áp đặt.** Majority vote của ba vòng tái tạo **đúng**
+nhãn vàng đang dùng: 18/20 case có đa số và khớp toàn bộ; 2 case không có đa số
+(`sc-03`, `sc-12` — mỗi người một nhãn khác nhau) chính là 2 case nhãn vàng để `uncertain`.
+Nghĩa là nhãn vàng chốt trước đó bằng kiểm chứng thủ công trùng khớp với kết quả bỏ phiếu —
+mọi số liệu judge ở dưới và ở mục 6 giữ nguyên giá trị.
+
+### Đính chính: "không có false positive" là ảo
+
+Kết luận ở trên rằng judge **không có false positive** chỉ đúng khi đo với `labels-hieu.csv`
+— bộ nhãn đó có **0 case fail**. Một judge không thể bị bắt lỗi bỏ sót nếu bộ nhãn đối chiếu
+không hề đánh dấu case nào là xấu.
+
+Đo lại judge-prompt-v2 trên **nhãn vàng** (`evidence/confusion-matrix-v3-vs-gold.txt`):
+
+```
+           |      pass      fail uncertain
+      pass |        12         3         2
+      fail |         2         1         0
+ uncertain |         0         0         0
+Agreement: 13/20 = 65%
+```
+
+- Judge nhận đúng **12/14 = 86%** output tốt.
+- Judge bắt được **1/4 = 25%** output xấu — tức **bỏ sót 3 trong 4 lỗi thật**.
+
+Ba lỗi bị bỏ sót: `sc-05` (cite section không tồn tại), `sc-06` (quote là bản dịch),
+`sc-19` (làm hộ bài). Hai lỗi đầu **code bắt được với chi phí $0**; lỗi thứ ba thì cả code
+lẫn judge đều trượt, chỉ người đọc mới thấy.
+
+Tỉ lệ 25% trùng khớp với chính slide `s55` trong corpus của tutor: *"<25% bắt được output
+lỗi"*.
+
+### Bài học phương pháp — cái này quan trọng hơn con số
+
+Nếu nhóm dừng lại ở một vòng chấm, báo cáo này đã kết luận **"judge không bỏ sót lỗi nào"**
+và đề xuất giao `groundedness` cho judge tự quyết. Con số 25% chỉ hiện ra khi có nhãn vàng
+chứa case fail thật. → **Một bộ nhãn không có case fail thì không validate được judge**, dù
+agreement có cao đến đâu; nó chỉ đo được nửa dễ của bài toán.
+
+**Một hạn chế của chính phép đo này, ghi để người đọc tự chiết khấu:** cả ba vòng chấm đều
+được thực hiện với sự hỗ trợ của agent AI (xem `ai-support-log` của từng thành viên). Ba
+người đọc cùng một output với công cụ tương tự nhau có xu hướng hội tụ hơn ba người đọc hoàn
+toàn độc lập — con số đồng thuận 50% ở trên có thể vẫn còn **lạc quan** so với ba người chấm
+tay thuần tuý. Điều này không làm hỏng kết luận về judge (vì nhãn vàng đã được kiểm chứng
+bằng code ở những case quyết định), nhưng nó là lý do để không tự tin thái quá vào con số
+agreement giữa người với người.

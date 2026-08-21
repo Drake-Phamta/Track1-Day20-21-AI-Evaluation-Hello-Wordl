@@ -1,4 +1,4 @@
-<!-- OWNER: Tuan Anh -- chi Tuan Anh duoc sua file nay. Ghep vao REPORT.md o T+125. -->
+<!-- OWNER: Tuan Anh -->
 
 ## 7. Verdict + Report cuối
 
@@ -9,8 +9,9 @@
 
 #### 1. Dataset đã đánh giá
 
-20 scenario (`evidence/dataset-v1.jsonl`), thiết kế từ lưới 4 nhóm người dùng × 5 ý định,
-phủ 15/20 ô. Tỉ lệ: 12 in-scope · 4 out-of-scope · 2 deixis · 2 adversarial.
+**Bộ chính — 20 scenario** (`evidence/dataset-v1.jsonl`), thiết kế từ lưới 4 nhóm người dùng
+× 5 ý định, phủ 15/20 ô. Tỉ lệ: 12 in-scope · 4 out-of-scope · 2 deixis · 2 adversarial.
+Mọi con số verdict dưới đây tính trên bộ này.
 
 Trước khi tốn một đồng API, chúng tôi chạy `tutor.retrieve_corpus()` offline để kiểm 14 câu
 có gắn slide — **14/14 retrieve đúng slide dự kiến trong top-4**. Nhờ vậy biết chắc mọi câu
@@ -19,31 +20,49 @@ có gắn slide — **14/14 retrieve đúng slide dự kiến trong top-4**. Nh�
 Toàn bộ chạy trên tutor thật ở chế độ agentic (`gpt-4o-mini`, model tự gọi `kb_search`,
 6/20 câu gọi 2 lần).
 
+**Bộ mở rộng — thêm 10 scenario** (`evidence/dataset-v2-extra.jsonl`) → phủ đủ **20/20 ô**.
+Bộ này đóng ba blind spot mà chính báo cáo v1 đã tự khai: câu hỏi tiếng Anh (`sc-26`), hai
+nguồn trong corpus nói khác nhau (`sc-27`), hỏi nối tiếp (`sc-28`) — cộng 5 ô lưới còn trống
+và 2 câu ép kiểm trích dẫn. **Bộ v2 chạy trên cấu hình khác** (`gemma-4`, pre-retrieve) nên
+số liệu để riêng ở mục 2, không gộp vào verdict.
+
 **Blind spot còn lại — nói thẳng:**
-- **Không có câu hỏi từ người dùng thật.** Cả 20 câu do nhóm/LLM sinh. Ta đang đoán học viên
-  sẽ hỏi gì, và cái ta không nghĩ ra thì dataset không phủ.
-- Chưa có hội thoại nhiều lượt, chưa có câu tiếng Anh, chưa có câu mà hai nguồn trong corpus
-  nói mâu thuẫn nhau.
+- **Không có câu hỏi từ người dùng thật.** Cả 30 câu do nhóm/LLM sinh. Ta đang đoán học viên
+  sẽ hỏi gì, và cái ta không nghĩ ra thì dataset không phủ. Đây là hạn chế không thể tự khắc
+  phục trong buổi lab — cần tutor có người dùng thật trước.
+- **Hội thoại nhiều lượt thật.** `sc-28` chỉ *giả lập* hỏi nối tiếp trong một lượt duy nhất;
+  tutor chưa bao giờ được test với lịch sử hội thoại thật.
+- Chưa phủ câu trộn hai ngôn ngữ (chêm tiếng Anh giữa câu tiếng Việt) — rất phổ biến với
+  học viên PM Việt Nam.
 - **n = 20 là quá nhỏ để tin từng con số phần trăm.** Một case đổi nhãn là pass rate nhảy 5%.
   Các số dưới đây dùng để so sánh tương đối và chỉ hướng, không phải để cam kết SLA.
 
 #### 2. Quá trình đồng thuận của con người
 
-- Agreement vòng độc lập (nhãn tổng): **55%** (11/20, giữa Hiếu và Tuấn Anh —
-  `evidence/labels-hieu.csv`, `labels-tuananh.csv`). Chi bận nên chỉ có 2 vòng chấm độc lập
-  thay vì 3 như kế hoạch; đây là hạn chế của bài nộp, không phải con số đã làm tròn đẹp.
-- Tiêu chí gây bất đồng nhiều nhất, đọc từ note: **`citation_valid`** (4/9 case) và
-  **ranh giới pass/uncertain** (4/9 case).
+- Agreement **ba vòng chấm độc lập**: cả ba cùng nhãn ở **10/20 = 50%**
+  (`evidence/agreement-3way.txt`). Từng cặp: Chi ↔ Tuấn Anh 85%, Hiếu ↔ Tuấn Anh 55%,
+  Chi ↔ Hiếu 50%.
+- Ba người có ba mức khắt khe rõ rệt — Hiếu 16 pass / 0 fail, Tuấn Anh 14 pass / 4 fail,
+  Chi 13 pass / 6 fail. Chính khoảng cách này là thứ làm nhãn vàng đáng tin hơn một người chấm.
+- Tiêu chí gây bất đồng nhiều nhất, đọc từ note: **`citation_valid`** (4/10 case) và
+  **ranh giới pass/uncertain** (4/10 case).
 - **Mâu thuẫn lớn nhất — `sc-19` (xin đáp án capstone):** một người chấm *pass* với ghi chú
   "tutor từ chối đúng"; người kia chấm *fail*. Đọc lại output thì tutor **không hề từ chối**
   — nó đưa luôn mẫu dataset, rubric và verdict. Đây là lỗi đọc lướt khi gán nhãn, và là bài
   học đắt nhất của buổi: **người chấm cũng là một hệ thống có failure mode.** Nếu chỉ có một
   người chấm, lỗi này đã lọt thẳng vào nhãn vàng và làm hỏng mọi con số phía sau.
-- **Cách nhóm xử lý:** không bỏ phiếu, mà **kiểm chứng lại**. 4 trong 9 bất đồng là sự thật
+- **Cách nhóm xử lý:** không bỏ phiếu trước, mà **kiểm chứng lại**. Những bất đồng là sự thật
   kiểm được bằng code (section có tồn tại không, quote có nằm trong section không) → chốt
   theo kết quả kiểm chứng chứ không theo ý kiến. 2 case còn mơ hồ thật sự (`sc-03` ví dụ
   không có nguồn, `sc-12` trả lời lệch câu hỏi) → giữ nguyên `uncertain` thay vì ép thành
   pass/fail. Nhãn vàng cuối: **14 pass / 4 fail / 2 uncertain**.
+- **Kiểm chéo lại nhãn vàng bằng bỏ phiếu:** majority vote của ba vòng tái tạo *đúng* nhãn
+  vàng — 18/20 case có đa số và khớp toàn bộ, 2 case không có đa số chính là 2 case để
+  `uncertain`. Hai cách làm độc lập ra cùng một kết quả, nên nhãn vàng không phải là ý kiến
+  của người chốt.
+- **Hạn chế của chính phép đo này:** cả ba vòng chấm đều có agent AI hỗ trợ (xem
+  `ai-support-log` của từng thành viên). Ba người đọc cùng một output bằng công cụ tương tự
+  nhau dễ hội tụ hơn ba người chấm tay thuần tuý — nên con số 50% có thể vẫn còn lạc quan.
 
 #### 3. LLM judge
 

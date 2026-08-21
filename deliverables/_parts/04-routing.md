@@ -1,4 +1,4 @@
-<!-- OWNER: Hieu -- chi Hieu duoc sua file nay. Ghep vao REPORT.md o T+125. -->
+<!-- OWNER: Hieu -->
 
 ## 4. Routing Map
 
