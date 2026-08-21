@@ -1,50 +1,91 @@
 # Track1 · Day 21 — Capstone AI Evaluation · VLearn AI Tutor
 
-**Người nộp:** Tuấn Anh · **Nhóm:** Chi · Hiếu · Tuấn Anh
+**Nhóm:** Nguyễn Ngọc Chi · Nguyễn Minh Hiếu · Phạm Tuấn Anh
 **Sản phẩm được đánh giá:** VLearn AI Tutor — trợ giảng RAG, tool-calling `kb_search` trên corpus 18 tài liệu, output JSON `{scope, answer, sources, followup_questions}`.
 
-## Verdict tóm tắt
+## Verdict
 
 > ### HOLD — chưa ship
 >
-> 3/4 tiêu chí blocker trượt. Tutor giữ kỷ luật phạm vi rất tốt (chặn được cả bẫy hỏi giá API lẫn prompt injection, 20/20 `schema_valid`) nhưng **không đáng tin ở khâu trích nguồn** — 1 lần cite section không tồn tại, 1 lần dịch quote rồi gọi đó là nguyên văn, 7/20 quote không khớp section. Với sản phẩm mà toàn bộ giá trị nằm ở *"tôi chỉ trả lời từ tài liệu khoá học"*, đây là lỗi phá vỡ lời hứa cốt lõi.
+> 3/4 tiêu chí blocker trượt. Tutor giữ kỷ luật phạm vi rất tốt — chặn được cả bẫy hỏi giá API lẫn prompt injection, 20/20 `schema_valid` — nhưng **không đáng tin ở khâu trích nguồn**: 1 lần cite section không tồn tại, 1 lần dịch quote rồi gọi đó là nguyên văn, 7/20 quote không khớp section. Với sản phẩm mà toàn bộ giá trị nằm ở *"tôi chỉ trả lời từ tài liệu khoá học"*, đây là lỗi phá vỡ lời hứa cốt lõi.
+>
+> Ngưỡng gate được đặt **trước** khi chạy. Nhóm không nới nó để ép thành "ship with conditions".
 
 | | |
 |---|---|
-| Dataset | 20 scenario, lưới 4 nhóm user × 5 intent, phủ 15/20 ô |
-| Nhãn người | 2 vòng chấm độc lập · đồng thuận **55%** · nhãn vàng 14 pass / 4 fail / 2 uncertain |
+| Dataset | **30 câu**, lưới 4 nhóm user × 5 intent, phủ **20/20 ô** (20 câu bộ chính + 10 câu mở rộng) |
+| Nhãn người | **3 vòng chấm độc lập** · cả ba cùng nhãn 50% · nhãn vàng 14 pass / 4 fail / 2 uncertain |
 | LLM judge | 2 vòng calibration · agreement **65%** · nhận đúng 86% output tốt nhưng **chỉ bắt 25% output xấu** |
 | Chi phí 1 vòng eval | **$0,019** · 98 giây · 110k token |
 
-**Phát hiện trung tâm:** judge **mù với lỗi trích nguồn** vì nó chỉ nhìn thấy chuỗi ký tự trong `sources`, không có quyền truy cập corpus để đối chiếu — không prompt nào sửa được. Trong khi đó `citation_exists`, một code check ~10 dòng chạy với $0, bắt lỗi đó ngay. Đây là căn cứ cho quyết định routing: **tuyệt đối không giao kiểm tra tồn tại nguồn cho LLM judge.**
+### Ba phát hiện chính
 
-## Đóng góp của tôi (Tuấn Anh)
+1. **LLM judge mù với lỗi trích nguồn, và không sửa được bằng prompt.** Judge chỉ nhìn thấy chuỗi ký tự trong `sources`; nó không có quyền truy cập corpus để đối chiếu. Ở `sc-05` tutor cite một section không tồn tại, judge cho pass và còn khẳng định nguồn "chính xác". Trong khi đó `citation_exists` — một code check ~10 dòng, $0 — bắt được ngay. → **Tuyệt đối không giao kiểm tra tồn tại nguồn cho LLM judge.**
 
-- Dựng khung làm việc chống conflict cho 3 người: [SPRINT-PLAN.md](SPRINT-PLAN.md), [TEAM-BRIEFS.md](TEAM-BRIEFS.md), [deliverables/_parts/](deliverables/_parts/) (tách 7 mục REPORT thành 7 file có chủ sở hữu), [assemble_report.py](assemble_report.py).
-- Thiết kế Input Grid + sinh [dataset-v1.jsonl](deliverables/evidence/dataset-v1.jsonl) 20 scenario; kiểm đề offline bằng `retrieve_corpus()` trước khi tốn API (14/14 câu có slide truy đúng nguồn).
-- Chạy pipeline, gán nhãn độc lập ([labels-tuananh.csv](deliverables/evidence/labels-tuananh.csv)), dựng nhãn vàng, đo lại judge trên nhãn vàng.
-- Viết mục 1, 2, 6, 7 của REPORT; ghép REPORT hoàn chỉnh.
-- Vá `tutor/tutor.py`: fallback pre-retrieve khi endpoint không hỗ trợ tool-calling (`ToolsUnsupported` + `answer_pre_retrieved`), giữ nguyên contract để downstream không đổi.
-- Dựng [slides/](slides/) — deck 13 slide sinh tự động từ evidence.
+2. **Một phần ba corpus gần như chết.** `chip-huyen-ch4` là tài liệu lớn nhất (123k ký tự) nhưng chỉ được truy ra **1/129 lượt**, vì nó bị cắt thành 15 khối trung bình 8.213 ký tự — gấp 8 lần mọi doc khác — và BM25 phạt độ dài. Ba tài liệu tham chiếu thật cộng lại chỉ 4,7% số lượt; slide bài giảng chiếm 49%.
 
-**Hiếu:** rubric + routing (mục 3, 4), 2 vòng calibrate judge (mục 5), 2 code check mới, `results-v1` chạy agentic thật.
-**Chi:** thiết kế coverage cho dataset (bận nửa cuối buổi; phần slides và review dataset do Tuấn Anh nhận lại).
+3. **Một cấu hình bị bó buộc cho điểm eval đẹp hơn mà không hề tốt hơn.** Bản chạy pre-retrieve đạt `citation_exists` 20/20, "tốt hơn" bản agentic — nhưng nó không có *cơ hội* bịa nguồn vì bị ép dùng section code lấy sẵn. Trước khi mừng vì pass rate tăng, phải hỏi phiên bản mới có cơ hội mắc lỗi đó không.
+
+## Đóng góp
+
+| Thành viên | Vai | Phụ trách |
+|---|---|---|
+| **Nguyễn Ngọc Chi** | Dataset & Coverage Lead → Slides | Input Grid 4×5; dataset v1 (20 câu) và v2 mở rộng (10 câu); kiểm retrieval offline trước khi tốn API; vòng chấm nhãn độc lập; mục 1–2 của REPORT; toàn bộ deck 14 slide + speaker notes |
+| **Nguyễn Minh Hiếu** | Rubric & Judge Lead | Rubric 5 tiêu chí và routing map (mục 3–4); 2 code check bổ sung trong `eval/code_checks.py`; 2 vòng calibrate judge (mục 5); `results-v1` chạy agentic thật |
+| **Phạm Tuấn Anh** | Pipeline & Integration Lead | Khung làm việc chống conflict (`_parts/` + `assemble_report.py`); vá `tutor.py` fallback khi endpoint không hỗ trợ tool-calling; vòng chấm nhãn độc lập; dựng nhãn vàng; scorecard và verdict (mục 6–7); tích hợp và ghép REPORT |
+
+## Nộp bài
+
+Mỗi thành viên có một nhánh riêng, **checkout là nộp được, không phải sửa gì thêm**:
+
+```bash
+git checkout nop/chi        # Nguyễn Ngọc Chi   · 2A202602024
+git checkout nop/hieu       # Nguyễn Minh Hiếu  · 2A202601154
+git checkout nop/tuananh    # Phạm Tuấn Anh     · 2A202601840
+```
+
+Rồi đổi tên thư mục thành `Track1_Day21_<MHV>_<HọVàTên>` và nộp.
+
+Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); `deliverables/`, `slides/` và toàn bộ code giống hệt nhau.
 
 ## Đường vào bài nộp
 
 | Cần xem gì | Ở đâu |
 |---|---|
 | Report 7 mục A→Z | [deliverables/REPORT.md](deliverables/REPORT.md) |
-| Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 15 file |
+| Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 19 file |
 | Slides thuyết trình | [slides/index.html](slides/index.html) — mở bằng double-click, phím ← → |
-| Dùng AI ở đâu, AI sai ở đâu | [deliverables/ai-support-log.md](deliverables/ai-support-log.md) |
+| Kịch bản nói | [slides/speaker-notes.md](slides/speaker-notes.md) |
+| Dùng AI ở đâu, AI sai ở đâu | `ai-support-log-<tên>.md` ở thư mục gốc |
+| Tài liệu quy trình làm việc | [process/](process/) — kế hoạch sprint và phân công |
 
-### Hạn chế đã biết, nói thẳng
+## Chạy lại từ đầu
+
+```powershell
+$env:PYTHONIOENCODING="utf-8"        # bắt buộc trên Windows, thiếu là crash UnicodeEncodeError
+pip install -r requirements.txt
+Copy-Item .env.example .env          # điền API key của bạn
+python tests/test_eval_kit.py        # 44 test offline, phải pass hết
+
+Copy-Item deliverables\evidence\dataset-v1.jsonl dataset.jsonl
+python eval/run_eval.py              # -> results.jsonl
+python eval/code_checks.py           # làn code, không tốn API
+python eval/report.py                # -> report.html để gán nhãn
+python eval/judge.py                 # -> verdicts.jsonl + confusion matrix
+
+python assemble_report.py --check    # kiểm 7 mục REPORT còn placeholder không
+python slides/build.py               # dựng lại deck từ evidence/
+```
+
+Dùng `python`, **không phải `python3`**. Mọi lệnh chạy từ thư mục gốc repo.
+
+### Hạn chế đã biết
 
 1. **Judge trùng model với tutor** (đều `gpt-4o-mini`) — hạ tầng nhóm chỉ có một model khả dụng. Vi phạm nguyên tắc "judge phải khác tutor"; mọi số liệu judge phải đọc kèm cảnh báo tự chấm chéo.
-2. **Chỉ 2 vòng chấm độc lập thay vì 3** — Chi bận nửa cuối buổi.
-3. **Chưa gắn tracing Braintrust/LangSmith.** Nhóm không kịp lấy API key trong buổi. Code đã sẵn sàng (`eval/tracing.py` tự nhận backend), chỉ thiếu key.
+2. **Bộ v2 chạy cấu hình khác bộ v1** (`gemma-4` pre-retrieve vs `gpt-4o-mini` agentic) nên số liệu để riêng, không gộp vào verdict.
+3. **Chưa gắn tracing Braintrust/LangSmith.** Code đã sẵn sàng (`eval/tracing.py` tự nhận backend), chỉ thiếu API key.
 4. **n = 20 là quá nhỏ** để tin từng con số phần trăm — một case đổi nhãn là pass rate nhảy 5%.
+5. **Không có câu hỏi nào từ người dùng thật** — cả 30 câu do nhóm hoặc LLM sinh.
 
 ---
 

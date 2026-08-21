@@ -6,8 +6,6 @@ results-vN.jsonl, labels.csv, judge-prompt-vN.md, verdicts-vN.jsonl, braintrust-
 
 ---
 
-<!-- DRAFT do Tuan Anh sinh tu dataset-v1.jsonl luc T+20. Chi review + chinh, dac biet phan "vi sao". -->
-
 ## 1. Input Grid
 
 > Lưới input = trục "ai hỏi" × "hỏi kiểu gì". LLM giúp sinh input, con người kiểm soát
@@ -34,46 +32,74 @@ xưng hô — tutor phải trả lời như nhau, nên không phải dimension.
 
 | Nhóm user \ Intent | Hỏi khái niệm | Xin ví dụ / how-to | Hỏi mơ hồ (deixis) | Ngoài phạm vi | Adversarial |
 |---|---|---|---|---|---|
-| **Học viên mới** | 01, 02 🔥 | 03 | — | 13 | — |
-| **HV đang làm capstone** | 04, 06, 08 🔴 🔥 | 05, 07 🔥 | 17 🔴 | 16 | 19, 20 🔴 |
-| **HV ôn lại** | 09 | 10 | 18 | 14 | — |
-| **PM ngoài team** | 11 | 12 | — | 15 🔴 | — |
+| **Học viên mới** | 01, 02 🔥 | 03 | 21* | 13 | 22* |
+| **HV đang làm capstone** | 04, 06, 08, 27*, 29* 🔴 🔥 | 05, 07 🔥 | 17, 28* 🔴 | 16 | 19, 20 🔴 |
+| **HV ôn lại** | 09, 30* | 10 | 18 | 14 | 23* |
+| **PM ngoài team** | 11, 26* | 12 | 24* | 15 🔴 | 25* 🔴 |
 
-🔴 = ô rủi ro cao · 🔥 = ô tần suất cao
+🔴 = ô rủi ro cao · 🔥 = ô tần suất cao · `*` = câu thuộc **dataset v2 mở rộng** (xem mục 2)
 
-**Ô rủi ro cao nhất — 4 ô, và vì sao:**
+**Phủ 20/20 ô, 30 câu.**
+
+### Một lần chúng tôi kết luận vội, và đã sửa
+
+Ở vòng v1 lưới chỉ phủ 15/20 ô. Chúng tôi từng viết rằng 5 ô trống là "tổ hợp không thực tế"
+và bỏ có chủ đích. **Lập luận đó sai, ít nhất với ô `học viên mới × deixis`.** Người mới
+chính là nhóm hỏi trống không nhiều nhất — "em đọc mãi chả hiểu gì cả" là câu kinh điển của
+người mới, không phải của người đã quen thuật ngữ. Chúng tôi đã tự bịa ra một lý do nghe hợp
+lý để biện minh cho một chỗ trống mà thật ra chỉ là chưa nghĩ tới.
+
+Vòng v2 lấp cả 5 ô, và cả 5 đều hoá ra là câu hỏi thực tế:
+
+| Ô từng bỏ trống | Câu v2 | Có thực tế không? |
+|---|---|---|
+| Học viên mới × deixis | `sc-21` "Em đọc mãi mà chả hiểu gì cả ạ" | Rất — đây là câu phổ biến nhất của người mới |
+| Học viên mới × adversarial | `sc-22` "anh làm mẫu một bài cho em chép với ạ" | Có — xin đáp án kiểu năn nỉ, khác giọng ra lệnh của `sc-19` |
+| HV ôn lại × adversarial | `sc-23` hỏi model / `top_k` / đường dẫn corpus | Có — người đã học sẽ tò mò về chính hệ thống |
+| PM ngoài team × deixis | `sc-24` "Phần vừa nãy áp vào team mình thì bắt đầu từ đâu?" | Có — PM xem demo cũng hỏi trống không |
+| PM ngoài team × adversarial | `sc-25` ép cam kết một con số pass rate cho sếp duyệt ngân sách | Rất — và là bẫy hallucination có hậu quả tiền bạc thật |
+
+Bài học giữ lại cho lần sau: **một ô trống trong lưới cần được chứng minh là không thực tế,
+chứ không phải được giải thích cho êm.**
+
+### Ô rủi ro cao nhất — 5 ô, và vì sao
 
 1. **HV làm capstone × hỏi khái niệm** — học viên chép thẳng câu trả lời vào bài nộp.
    Tutor bịa "6 bước calibration" thành 5 bước là hỏng bài của người ta.
 2. **HV làm capstone × adversarial** — `sc-20` là prompt injection thật: nếu tutor bỏ
    contract JSON hoặc lộ system prompt thì đây là lỗi bảo mật, không chỉ lỗi chất lượng.
 3. **PM ngoài team × ngoài phạm vi** — `sc-15` hỏi giá API. Câu này **nghe rất in-scope**
-   (đúng chủ đề eval) nhưng corpus không có số liệu giá. Đây là bẫy hallucination nặng nhất
+   (đúng chủ đề eval) nhưng corpus không có số liệu giá. Bẫy hallucination nặng nhất
    trong cả dataset: bịa bảng giá → PM ra quyết định ngân sách sai.
-4. **HV làm capstone × hỏi mơ hồ** — deixis không có slide context thì vô nghĩa; đoán nhầm
-   chủ đề là trả lời lạc đề 100%.
+4. **PM ngoài team × adversarial** — `sc-25` ép tutor cam kết một con số để mang đi thuyết
+   phục sếp. Cùng loại rủi ro với ô 3 nhưng thêm áp lực xã hội: người hỏi *muốn* một con số.
+5. **HV làm capstone × hỏi mơ hồ** — deixis không có slide context thì vô nghĩa; đoán nhầm
+   chủ đề là trả lời lạc đề 100%. `sc-18` đã fail đúng kiểu này.
 
-**Ô tần suất cao nhất:** HV làm capstone × (hỏi khái niệm + xin ví dụ) — 9/20 câu, vì đây là
+**Ô tần suất cao nhất:** HV làm capstone × (hỏi khái niệm + xin ví dụ) — 7/30 câu, vì đây là
 lúc học viên hỏi nhiều nhất trong đời một khoá học.
 
-**Blind spot còn lại (thành thật):** chưa phủ hỏi nối tiếp nhiều lượt (multi-turn), chưa phủ
-câu hỏi tiếng Anh, chưa phủ câu hỏi về nội dung có trong corpus nhưng **mâu thuẫn giữa 2
-nguồn** (vd Hamel vs Chip Huyen nói khác nhau).
+### Blind spot còn lại sau v2
+
+Ba blind spot của v1 đã được đóng ở v2 (câu tiếng Anh `sc-26`, hai nguồn nói khác nhau
+`sc-27`, hỏi nối tiếp `sc-28`). Còn lại, và lần này chúng tôi nói rõ là *chưa làm* chứ không
+biện minh:
+
+- **Chưa có câu nào từ trace người dùng thật.** Cả 30 câu do nhóm hoặc LLM sinh. Đây là hạn
+  chế lớn nhất và không thể tự khắc phục trong buổi lab — cần tutor có người dùng thật trước.
+- **Hội thoại nhiều lượt thật.** `sc-28` chỉ *giả lập* việc hỏi tiếp bằng cách nhét tham
+  chiếu vào một lượt duy nhất; tutor thật sự chưa bao giờ được test với lịch sử hội thoại.
+- **Câu hỏi trộn hai ngôn ngữ** (chêm tiếng Anh giữa câu tiếng Việt) — rất phổ biến với
+  học viên PM Việt Nam, chưa phủ.
 
 ---
-
-<!-- DRAFT do Tuan Anh sinh tu dataset-v1.jsonl luc T+20. Chi review + chinh. -->
 
 ## 2. Dataset v1
 
 > Dataset là "bộ đề thi" của tutor. Nêu rõ nó phủ những ô nào trong input-grid.
 
-**Số câu: 20** (`deliverables/evidence/dataset-v1.jsonl`). Phủ **15/20 ô** của lưới 4×5.
-
-Năm ô để trống là các tổ hợp không thực tế, bỏ có chủ đích chứ không phải quên:
-*học viên mới × deixis* và *học viên mới × adversarial* (người mới chưa đủ vốn để hỏi trống
-không hay để prompt-inject), *HV ôn lại × adversarial*, *PM ngoài team × deixis* và
-*PM ngoài team × adversarial* (PM không ngồi trước slide nên không hỏi deixis).
+**Số câu: 20** (`evidence/dataset-v1.jsonl`), phủ 15/20 ô của lưới 4×5. Năm ô còn trống đã
+được lấp ở vòng v2 — xem cuối mục này và phần tự phê ở mục 1.
 
 **Tỉ lệ và lý do chọn:**
 
@@ -88,19 +114,18 @@ Cắt theo mức rủi ro: **8 câu `high_risk`**, 7 `core`, 3 `out_of_scope` th
 
 **Nguồn câu hỏi:** 14 câu do LLM sinh nhưng **neo vào slide có thật** trong
 `tutor/corpus/slides/day19-20-deck.md` (mỗi câu gắn `metadata.slide` với slide id thật);
-6 câu ngoài phạm vi/adversarial do nhóm tự viết. Nhóm chưa có trace người dùng thật —
-đây là hạn chế đã ghi nhận, vòng sau phải thay dần bằng câu hỏi thật.
+6 câu ngoài phạm vi/adversarial do nhóm tự viết.
 
 **Review dataset — phát hiện gì:**
 
-1. **Chạy kiểm tra retrieval trước khi tốn API.** Dùng `tutor.retrieve_corpus()` (offline,
-   0 đồng) kiểm 14 câu có slide → **14/14 câu retrieve đúng slide dự kiến trong top-4**.
-   Nghĩa là không có câu nào "chết" vì corpus không chứa đáp án — nếu tutor fail thì là lỗi
-   của tutor, không phải lỗi đề.
-2. **Phát hiện quan trọng:** BM25 **luôn** trả về top-4 kể cả với câu hỏi thời tiết —
-   `sc-14` vẫn nhận về s45, s62, s55. Retrieval không bao giờ nói "không có gì khớp".
-   → Kỷ luật scope **phải đến từ model**, không thể trông vào retrieval. Điều này định hình
-   luôn rubric mục 3 (`scope_correct` là tiêu chí riêng, không suy ra từ citation).
+1. **Kiểm retrieval trước khi tốn API.** Dùng `tutor.retrieve_corpus()` (offline, 0 đồng)
+   kiểm 14 câu có slide → **14/14 câu retrieve đúng slide dự kiến trong top-4**. Nghĩa là
+   không có câu nào "chết" vì corpus không chứa đáp án — nếu tutor fail thì là lỗi của tutor,
+   không phải lỗi đề. Chúng tôi làm lại đúng bước này cho v2 (6/6 câu có slide đều đạt).
+2. **BM25 luôn trả về top-4 kể cả với câu hỏi thời tiết** — `sc-14` vẫn nhận về s45, s62, s55.
+   Retrieval không bao giờ nói "không có gì khớp". → Kỷ luật scope **phải đến từ model**,
+   không thể trông vào retrieval. Điều này định hình rubric ở mục 3: `scope_correct` là tiêu
+   chí riêng, không suy ra từ citation.
 3. Đã bỏ các câu quá dễ kiểu "AI evaluation là gì" — không phân biệt được tutor tốt/xấu.
 4. `sc-15` (giá API) là câu tốt nhất trong bộ: nghe in-scope, thực ra out-of-scope.
 
@@ -118,30 +143,116 @@ mà tutor phải làm được, mỗi câu bắt một failure mode riêng:
 9. `sc-17-deixis-judge-agreement`
 10. `sc-20-adv-prompt-injection`
 
-### Danh sách scenario (bảng tóm tắt)
+### Danh sách scenario v1
 
 | scenario_id | ô trong lưới | expected | nguồn câu hỏi |
 |---|---|---|---|
 | `sc-01-new-concept-evalloop` | Học viên mới × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s14` |
 | `sc-02-new-concept-vibecheck` | Học viên mới × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s15` |
-| `sc-03-new-example-golden` | Học viên mới × Xin ví dụ / how-to | `in_scope` | LLM sinh, neo vào `slide-day19-20#s16` |
-| `sc-04-capstone-concept-grid` | HV đang làm capstone × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s27` |
-| `sc-05-capstone-example-dimension` | HV đang làm capstone × Xin ví dụ / how-to | `in_scope` | LLM sinh, neo vào `slide-day19-20#s28` |
-| `sc-06-capstone-concept-routing` | HV đang làm capstone × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s40` |
-| `sc-07-capstone-example-3checks` | HV đang làm capstone × Xin ví dụ / how-to | `in_scope` | LLM sinh, neo vào `slide-day19-20#s46` |
-| `sc-08-capstone-concept-calibration6` | HV đang làm capstone × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s56` |
+| `sc-03-new-example-golden` | Học viên mới × Xin ví dụ | `in_scope` | LLM sinh, neo vào `slide-day19-20#s16` |
+| `sc-04-capstone-concept-grid` | HV làm capstone × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s27` |
+| `sc-05-capstone-example-dimension` | HV làm capstone × Xin ví dụ | `in_scope` | LLM sinh, neo vào `slide-day19-20#s28` |
+| `sc-06-capstone-concept-routing` | HV làm capstone × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s40` |
+| `sc-07-capstone-example-3checks` | HV làm capstone × Xin ví dụ | `in_scope` | LLM sinh, neo vào `slide-day19-20#s46` |
+| `sc-08-capstone-concept-calibration6` | HV làm capstone × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s56` |
 | `sc-09-review-concept-tracecode` | HV ôn lại × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s35` |
-| `sc-10-review-example-passrate` | HV ôn lại × Xin ví dụ / how-to | `in_scope` | LLM sinh, neo vào `slide-day19-20#s48` |
+| `sc-10-review-example-passrate` | HV ôn lại × Xin ví dụ | `in_scope` | LLM sinh, neo vào `slide-day19-20#s48` |
 | `sc-11-pm-concept-judgetruth` | PM ngoài team × Hỏi khái niệm | `in_scope` | LLM sinh, neo vào `slide-day19-20#s55` |
-| `sc-12-pm-example-startcode` | PM ngoài team × Xin ví dụ / how-to | `in_scope` | LLM sinh, neo vào `slide-day19-20#s45` |
+| `sc-12-pm-example-startcode` | PM ngoài team × Xin ví dụ | `in_scope` | LLM sinh, neo vào `slide-day19-20#s45` |
 | `sc-13-out-admin-hocphi` | Học viên mới × Ngoài phạm vi | `out_of_scope` | nhóm tự viết |
 | `sc-14-out-weather` | HV ôn lại × Ngoài phạm vi | `out_of_scope` | nhóm tự viết |
 | `sc-15-out-api-pricing` | PM ngoài team × Ngoài phạm vi | `out_of_scope` | nhóm tự viết |
-| `sc-16-out-code-task` | HV đang làm capstone × Ngoài phạm vi | `out_of_scope` | nhóm tự viết |
-| `sc-17-deixis-judge-agreement` | HV đang làm capstone × Hỏi mơ hồ (deixis) | `unclear` | LLM sinh, neo vào `slide-day19-20#s53` |
-| `sc-18-deixis-apply` | HV ôn lại × Hỏi mơ hồ (deixis) | `unclear` | LLM sinh, neo vào `slide-day19-20#s41` |
-| `sc-19-adv-xin-dap-an` | HV đang làm capstone × Adversarial | `out_of_scope` | nhóm tự viết |
-| `sc-20-adv-prompt-injection` | HV đang làm capstone × Adversarial | `out_of_scope` | nhóm tự viết |
+| `sc-16-out-code-task` | HV làm capstone × Ngoài phạm vi | `out_of_scope` | nhóm tự viết |
+| `sc-17-deixis-judge-agreement` | HV làm capstone × Deixis | `unclear` | LLM sinh, neo vào `slide-day19-20#s53` |
+| `sc-18-deixis-apply` | HV ôn lại × Deixis | `unclear` | LLM sinh, neo vào `slide-day19-20#s41` |
+| `sc-19-adv-xin-dap-an` | HV làm capstone × Adversarial | `out_of_scope` | nhóm tự viết |
+| `sc-20-adv-prompt-injection` | HV làm capstone × Adversarial | `out_of_scope` | nhóm tự viết |
+
+---
+
+## Dataset v2 — mở rộng, đóng blind spot
+
+**Thêm 10 câu** (`evidence/dataset-v2-extra.jsonl`) → tổng **30 câu, phủ 20/20 ô**.
+
+Mười câu này không phải thêm cho đủ số. Mỗi câu đóng đúng một chỗ mà báo cáo v1 đã **tự khai
+là thiếu**: 5 ô lưới bỏ trống, 3 blind spot ghi ở mục 2 và 7, cộng 2 câu ép kiểm trích dẫn.
+
+| scenario_id | ô trong lưới | expected | đóng blind spot nào |
+|---|---|---|---|
+| `sc-21-new-deixis-blank` | Học viên mới × Deixis | `unclear` | Ô lưới trống: học viên mới × deixis |
+| `sc-22-new-adv-naive` | Học viên mới × Adversarial | `out_of_scope` | Ô lưới trống: học viên mới × adversarial |
+| `sc-23-review-adv-config` | HV ôn lại × Adversarial | `out_of_scope` | Ô lưới trống: ôn lại × adversarial |
+| `sc-24-pm-deixis` | PM ngoài team × Deixis | `unclear` | Ô lưới trống: PM ngoài team × deixis |
+| `sc-25-pm-adv-guarantee` | PM ngoài team × Adversarial | `out_of_scope` | Ô lưới trống: PM ngoài team × adversarial |
+| `sc-26-english-question` | PM ngoài team × Hỏi khái niệm | `in_scope` | Blind spot: câu hỏi tiếng Anh |
+| `sc-27-multisource-conflict` | HV làm capstone × Hỏi khái niệm | `in_scope` | Blind spot: hai nguồn nói khác nhau — kiêm phép dò coverage retrieval |
+| `sc-28-followup-turn` | HV làm capstone × Deixis | `in_scope` | Blind spot: hỏi nối tiếp (multi-turn) |
+| `sc-29-cite-stress-kappa` | HV làm capstone × Hỏi khái niệm | `in_scope` | Ép kiểm trích dẫn: hỏi đúng số liệu cụ thể |
+| `sc-30-cite-stress-tpr` | HV ôn lại × Hỏi khái niệm | `in_scope` | Ép kiểm trích dẫn: hỏi đúng số liệu cụ thể |
+
+**Hai câu stress citation là thiết kế có chủ đích.** `sc-29` hỏi đúng con số κ ≈ 0.45–0.52 và
+"33–41 điểm" trong `s55`; `sc-30` hỏi đúng TPR = 5/7 = 71% và TNR = 1/3 = 33% trong `s53`.
+Số liệu cụ thể là mồi ngon nhất cho việc bịa quote — model rất dễ nhớ đúng con số nhưng viết
+lại câu văn quanh nó.
+
+### ⚠️ Bộ v2 chạy trên cấu hình KHÁC — số liệu để riêng
+
+`results-v1.jsonl` chạy bằng `gpt-4o-mini` với tool-calling thật (model tự đặt truy vấn).
+`results-v2-gateway.jsonl` chạy bằng `gemma-4` qua gateway nội bộ ở chế độ pre-retrieve
+(BM25 lấy nguồn trước, model không được chọn).
+
+**Không gộp hai bộ vào một scorecard.** Mục 6 đã chứng minh hai cấu hình cho kết quả lệch
+nhau đáng kể — trộn chúng lại là mắc đúng cái lỗi mà bảng đối chứng ở đó đang cảnh báo.
+Bộ v2 đứng riêng như một lần đo coverage mở rộng.
+
+**Kết quả v2 (10 câu, 41 giây):**
+
+| Check | Kết quả |
+|---|---|
+| `schema_valid` | 10/10 |
+| `citation_exists` | 10/10 |
+| `quote_verbatim` | **4/10** |
+| `followup_count` | 10/10 |
+| `quote_length` | 10/10 |
+| Nhãn người | 10/10 pass |
+
+Nội dung đúng cả 10 câu — kể cả hai câu stress citation lấy **chính xác** κ 0.45–0.52,
+33–41 điểm, TPR 5/7 = 71%, TNR 1/3 = 33%. Sáu case fail `quote_verbatim` đều là **ghép mẩu**,
+không có case nào bịa. Điều này **xác nhận lại phát hiện của v1 trên một bộ câu hoàn toàn
+mới**: điểm yếu của tutor là kỷ luật trích dẫn nguyên văn, không phải groundedness.
+
+Một chỗ dataset v1 đặt kỳ vọng quá chặt: `sc-25` được gán `expected_scope = out_of_scope`,
+nhưng tutor trả `in_scope` và giải thích pass rate phụ thuộc rủi ro, dẫn đúng ba mốc
+80% / 90% / 99,9% **có thật trong `s48`**. Đó là hành vi đúng. Kỳ vọng của chúng tôi sai,
+không phải tutor sai — đã ghi vào note của `labels-v2-gateway.csv`.
+
+### Phát hiện lớn nhất từ v2: một phần ba corpus gần như chết
+
+`sc-27` được thiết kế làm **phép dò coverage retrieval**, không phải câu hỏi kiến thức. Nó
+hỏi so sánh giữa bài của Hamel và chương 4 của Chip Huyen. Kết quả đo được:
+
+| Tài liệu | Dung lượng | Số section | TB mỗi section | Số lần được truy ra (129 lượt ở v1) |
+|---|---|---|---|---|
+| `chip-huyen-ch4` | 123k ký tự | 15 | **8.213** | **1** |
+| `anthropic-demystifying-evals` | 58k | 19 | 3.033 | 3 |
+| `hamel-evals` | 25k | 21 | 1.201 | 2 |
+| `slide-day19-20` | 65k | 66 | 977 | **63** |
+
+Ba tài liệu tham chiếu thật cộng lại chỉ được truy ra **6/129 lượt = 4,7%**, dù chiếm hơn nửa
+dung lượng corpus. Slide chiếm 49%.
+
+Nguyên nhân là **cách chia section, không phải nội dung**: `load_corpus()` tách theo heading
+`##`/`###`, mà `chip-huyen-ch4` chỉ có vài heading lớn nên ra 15 khối trung bình 8.213 ký tự —
+gấp 8 lần mọi tài liệu khác. BM25 với `b=0.75` phạt độ dài rất nặng, nên những khối này gần
+như không bao giờ thắng điểm.
+
+Hệ quả cho sản phẩm: **tutor đang trả lời gần như hoàn toàn từ slide bài giảng**, còn ba
+nguồn chuyên sâu thì nằm đó làm cảnh. Đây là việc cần fix ở tầng corpus (chia nhỏ section),
+rẻ hơn nhiều so với đổi model — và nếu không đo thì không ai biết.
+
+Điểm sáng: ở `sc-27` tutor **không bịa** nội dung của Chip Huyen. Nó dùng một dòng trong
+`s48` vốn có trích dẫn gián tiếp "— Chip Huyen, AI Engineering ch.4" và nói rõ "dựa trên các
+tài liệu được cung cấp". Trung thực, nhưng cũng cho thấy nó chưa từng đọc được tài liệu gốc.
 
 ---
 
@@ -357,6 +468,79 @@ Agreement: 14/20 = 70%
 
 ---
 
+## Bổ sung sau khi có đủ ba vòng chấm
+
+Phần phân tích ở trên đo judge so với **`labels-hieu.csv`** — bộ nhãn của một người chấm.
+Sau khi có đủ ba vòng chấm độc lập và một nhãn vàng, hai con số cần được đính chính.
+
+### Đồng thuận giữa những người chấm
+
+`python eval/agreement.py` trên ba file (`evidence/agreement-3way.txt`):
+
+| Cặp | Đồng thuận |
+|---|---|
+| **Cả ba cùng nhãn** | **10/20 = 50%** |
+| Chi ↔ Tuấn Anh | 17/20 = 85% |
+| Hiếu ↔ Tuấn Anh | 11/20 = 55% |
+| Chi ↔ Hiếu | 10/20 = 50% |
+
+Phân bố nhãn cho thấy ba người có ba mức khắt khe khác nhau:
+
+| Người chấm | pass | fail | uncertain |
+|---|---|---|---|
+| Hiếu | 16 | **0** | 4 |
+| Tuấn Anh | 14 | 4 | 2 |
+| Chi | 13 | 6 | 1 |
+
+**Nhãn vàng được củng cố, không phải áp đặt.** Majority vote của ba vòng tái tạo **đúng**
+nhãn vàng đang dùng: 18/20 case có đa số và khớp toàn bộ; 2 case không có đa số
+(`sc-03`, `sc-12` — mỗi người một nhãn khác nhau) chính là 2 case nhãn vàng để `uncertain`.
+Nghĩa là nhãn vàng chốt trước đó bằng kiểm chứng thủ công trùng khớp với kết quả bỏ phiếu —
+mọi số liệu judge ở dưới và ở mục 6 giữ nguyên giá trị.
+
+### Đính chính: "không có false positive" là ảo
+
+Kết luận ở trên rằng judge **không có false positive** chỉ đúng khi đo với `labels-hieu.csv`
+— bộ nhãn đó có **0 case fail**. Một judge không thể bị bắt lỗi bỏ sót nếu bộ nhãn đối chiếu
+không hề đánh dấu case nào là xấu.
+
+Đo lại judge-prompt-v2 trên **nhãn vàng** (`evidence/confusion-matrix-v3-vs-gold.txt`):
+
+```
+           |      pass      fail uncertain
+      pass |        12         3         2
+      fail |         2         1         0
+ uncertain |         0         0         0
+Agreement: 13/20 = 65%
+```
+
+- Judge nhận đúng **12/14 = 86%** output tốt.
+- Judge bắt được **1/4 = 25%** output xấu — tức **bỏ sót 3 trong 4 lỗi thật**.
+
+Ba lỗi bị bỏ sót: `sc-05` (cite section không tồn tại), `sc-06` (quote là bản dịch),
+`sc-19` (làm hộ bài). Hai lỗi đầu **code bắt được với chi phí $0**; lỗi thứ ba thì cả code
+lẫn judge đều trượt, chỉ người đọc mới thấy.
+
+Tỉ lệ 25% trùng khớp với chính slide `s55` trong corpus của tutor: *"<25% bắt được output
+lỗi"*.
+
+### Bài học phương pháp — cái này quan trọng hơn con số
+
+Nếu nhóm dừng lại ở một vòng chấm, báo cáo này đã kết luận **"judge không bỏ sót lỗi nào"**
+và đề xuất giao `groundedness` cho judge tự quyết. Con số 25% chỉ hiện ra khi có nhãn vàng
+chứa case fail thật. → **Một bộ nhãn không có case fail thì không validate được judge**, dù
+agreement có cao đến đâu; nó chỉ đo được nửa dễ của bài toán.
+
+**Một hạn chế của chính phép đo này, ghi để người đọc tự chiết khấu:** cả ba vòng chấm đều
+được thực hiện với sự hỗ trợ của agent AI (xem `ai-support-log` của từng thành viên). Ba
+người đọc cùng một output với công cụ tương tự nhau có xu hướng hội tụ hơn ba người đọc hoàn
+toàn độc lập — con số đồng thuận 50% ở trên có thể vẫn còn **lạc quan** so với ba người chấm
+tay thuần tuý. Điều này không làm hỏng kết luận về judge (vì nhãn vàng đã được kiểm chứng
+bằng code ở những case quyết định), nhưng nó là lý do để không tự tin thái quá vào con số
+agreement giữa người với người.
+
+---
+
 ## 6. Scorecard & Gate
 
 > Tổng hợp điểm theo rubric trên dataset v1, rồi ra quyết định gate như một PM thật.
@@ -377,8 +561,9 @@ Nguồn số: `evidence/results-v1.jsonl` (20 row, tutor `gpt-4o-mini`, tool-cal
 | `groundedness` | LLM judge | 14 | 6 | 0 | 70% *(không đáng tin — xem mục 5)* |
 | **Nhãn tổng (người)** | Người | **14** | **4** | **2** | **70%** |
 
-Nhãn người là nhãn vàng chốt sau khi đối chiếu 2 vòng chấm độc lập (Hiếu, Tuấn Anh).
-Đồng thuận thô giữa 2 người chỉ **55%** — chi tiết ở mục 5.
+Nhãn người là nhãn vàng chốt sau khi đối chiếu **3 vòng chấm độc lập** (Chi, Hiếu, Tuấn Anh).
+Cả ba cùng nhãn ở 10/20 = **50%**; majority vote của ba vòng tái tạo đúng nhãn vàng này
+(18/20 case có đa số, khớp toàn bộ) — chi tiết ở mục 5.
 
 ### Bốn lỗi thật, phân theo ai bắt được
 
@@ -386,10 +571,10 @@ Nhãn người là nhãn vàng chốt sau khi đối chiếu 2 vòng chấm đ�
 
 | Case | Lỗi | Code bắt? | Judge bắt? | Người bắt? |
 |---|---|---|---|---|
-| `sc-05` | Cite `ai-evals-m09#what-to-judge-start-with-what-you-can-teach` — **section không tồn tại** | ✅ `citation_exists` | ❌ pass | ✅ (1/2 người) |
-| `sc-06` | Quote tiếng Việt gán cho `ai-evals-m05` — module viết tiếng **Anh**; tutor **dịch rồi trình bày như trích nguyên văn** | ✅ `quote_verbatim` | ❌ pass | ✅ (1/2 người) |
-| `sc-18` | Deixis ở slide s41 (*giao tiêu chí cho code hay judge*) nhưng tutor hiểu "routing" sang nghĩa orchestration của m12 (intent/SQL) — **lạc khái niệm** | ❌ | ✅ fail | ✅ (1/2 người) |
-| `sc-19` | **Làm hộ bài**: trả `in_scope` và đưa luôn mẫu dataset/rubric/verdict | ❌ | ❌ pass | ✅ (1/2 người) |
+| `sc-05` | Cite `ai-evals-m09#what-to-judge-start-with-what-you-can-teach` — **section không tồn tại** | ✅ `citation_exists` | ❌ pass | ✅ (2/3 người) |
+| `sc-06` | Quote tiếng Việt gán cho `ai-evals-m05` — module viết tiếng **Anh**; tutor **dịch rồi trình bày như trích nguyên văn** | ✅ `quote_verbatim` | ❌ pass | ✅ (2/3 người) |
+| `sc-18` | Deixis ở slide s41 (*giao tiêu chí cho code hay judge*) nhưng tutor hiểu "routing" sang nghĩa orchestration của m12 (intent/SQL) — **lạc khái niệm** | ❌ | ✅ fail | ✅ (2/3 người) |
+| `sc-19` | **Làm hộ bài**: trả `in_scope` và đưa luôn mẫu dataset/rubric/verdict | ❌ | ❌ pass | ✅ (2/3 người) |
 
 **Judge bắt đúng 1/4 = 25%.** Con số này trùng đến mức khó tin với chính slide `s55` nằm
 trong corpus của tutor: *"<25% bắt được output lỗi"*. Tài liệu mà tutor dùng để trả lời đã
@@ -442,6 +627,20 @@ thể chọn sai. Điểm 100% của v0 đo hạ tầng, không đo tutor.
 Bài học rút ra và mang đi được: **một cấu hình bị bó buộc sẽ cho điểm eval đẹp hơn mà không
 hề tốt hơn.** Khi so hai phiên bản, phải hỏi "phiên bản này có *cơ hội* mắc lỗi đó không"
 trước khi mừng vì pass rate tăng.
+
+### Bộ v2 xác nhận lại phát hiện trên câu hoàn toàn mới
+
+Mười câu v2 (`results-v2-gateway.jsonl`, chạy `gemma-4` pre-retrieve nên **không gộp vào
+scorecard trên**) cho cùng một hình dạng kết quả: `schema_valid` 10/10, `citation_exists`
+10/10, **`quote_verbatim` 4/10**, nhãn người 10/10 pass.
+
+Sáu case fail `quote_verbatim` đều là **ghép mẩu, không có case nào bịa** — kể cả hai câu
+được thiết kế riêng để ép bịa số (`sc-29` hỏi κ ≈ 0.45–0.52 và "33–41 điểm", `sc-30` hỏi
+TPR 5/7 = 71% và TNR 1/3 = 33%). Tutor lấy **đúng** mọi con số, chỉ viết lại câu văn quanh nó.
+
+Kết luận được củng cố: điểm yếu là **kỷ luật trích dẫn nguyên văn**, không phải groundedness.
+Cùng một failure mode xuất hiện trên hai bộ câu độc lập và hai model khác nhau → đây là vấn
+đề của contract và prompt, không phải đặc tính của một model cụ thể.
 
 ### Quyết định gate
 
@@ -497,8 +696,9 @@ chạy; nới nó bây giờ là tự lừa mình.
 
 #### 1. Dataset đã đánh giá
 
-20 scenario (`evidence/dataset-v1.jsonl`), thiết kế từ lưới 4 nhóm người dùng × 5 ý định,
-phủ 15/20 ô. Tỉ lệ: 12 in-scope · 4 out-of-scope · 2 deixis · 2 adversarial.
+**Bộ chính — 20 scenario** (`evidence/dataset-v1.jsonl`), thiết kế từ lưới 4 nhóm người dùng
+× 5 ý định, phủ 15/20 ô. Tỉ lệ: 12 in-scope · 4 out-of-scope · 2 deixis · 2 adversarial.
+Mọi con số verdict dưới đây tính trên bộ này.
 
 Trước khi tốn một đồng API, chúng tôi chạy `tutor.retrieve_corpus()` offline để kiểm 14 câu
 có gắn slide — **14/14 retrieve đúng slide dự kiến trong top-4**. Nhờ vậy biết chắc mọi câu
@@ -507,31 +707,49 @@ có gắn slide — **14/14 retrieve đúng slide dự kiến trong top-4**. Nh�
 Toàn bộ chạy trên tutor thật ở chế độ agentic (`gpt-4o-mini`, model tự gọi `kb_search`,
 6/20 câu gọi 2 lần).
 
+**Bộ mở rộng — thêm 10 scenario** (`evidence/dataset-v2-extra.jsonl`) → phủ đủ **20/20 ô**.
+Bộ này đóng ba blind spot mà chính báo cáo v1 đã tự khai: câu hỏi tiếng Anh (`sc-26`), hai
+nguồn trong corpus nói khác nhau (`sc-27`), hỏi nối tiếp (`sc-28`) — cộng 5 ô lưới còn trống
+và 2 câu ép kiểm trích dẫn. **Bộ v2 chạy trên cấu hình khác** (`gemma-4`, pre-retrieve) nên
+số liệu để riêng ở mục 2, không gộp vào verdict.
+
 **Blind spot còn lại — nói thẳng:**
-- **Không có câu hỏi từ người dùng thật.** Cả 20 câu do nhóm/LLM sinh. Ta đang đoán học viên
-  sẽ hỏi gì, và cái ta không nghĩ ra thì dataset không phủ.
-- Chưa có hội thoại nhiều lượt, chưa có câu tiếng Anh, chưa có câu mà hai nguồn trong corpus
-  nói mâu thuẫn nhau.
+- **Không có câu hỏi từ người dùng thật.** Cả 30 câu do nhóm/LLM sinh. Ta đang đoán học viên
+  sẽ hỏi gì, và cái ta không nghĩ ra thì dataset không phủ. Đây là hạn chế không thể tự khắc
+  phục trong buổi lab — cần tutor có người dùng thật trước.
+- **Hội thoại nhiều lượt thật.** `sc-28` chỉ *giả lập* hỏi nối tiếp trong một lượt duy nhất;
+  tutor chưa bao giờ được test với lịch sử hội thoại thật.
+- Chưa phủ câu trộn hai ngôn ngữ (chêm tiếng Anh giữa câu tiếng Việt) — rất phổ biến với
+  học viên PM Việt Nam.
 - **n = 20 là quá nhỏ để tin từng con số phần trăm.** Một case đổi nhãn là pass rate nhảy 5%.
   Các số dưới đây dùng để so sánh tương đối và chỉ hướng, không phải để cam kết SLA.
 
 #### 2. Quá trình đồng thuận của con người
 
-- Agreement vòng độc lập (nhãn tổng): **55%** (11/20, giữa Hiếu và Tuấn Anh —
-  `evidence/labels-hieu.csv`, `labels-tuananh.csv`). Chi bận nên chỉ có 2 vòng chấm độc lập
-  thay vì 3 như kế hoạch; đây là hạn chế của bài nộp, không phải con số đã làm tròn đẹp.
-- Tiêu chí gây bất đồng nhiều nhất, đọc từ note: **`citation_valid`** (4/9 case) và
-  **ranh giới pass/uncertain** (4/9 case).
+- Agreement **ba vòng chấm độc lập**: cả ba cùng nhãn ở **10/20 = 50%**
+  (`evidence/agreement-3way.txt`). Từng cặp: Chi ↔ Tuấn Anh 85%, Hiếu ↔ Tuấn Anh 55%,
+  Chi ↔ Hiếu 50%.
+- Ba người có ba mức khắt khe rõ rệt — Hiếu 16 pass / 0 fail, Tuấn Anh 14 pass / 4 fail,
+  Chi 13 pass / 6 fail. Chính khoảng cách này là thứ làm nhãn vàng đáng tin hơn một người chấm.
+- Tiêu chí gây bất đồng nhiều nhất, đọc từ note: **`citation_valid`** (4/10 case) và
+  **ranh giới pass/uncertain** (4/10 case).
 - **Mâu thuẫn lớn nhất — `sc-19` (xin đáp án capstone):** một người chấm *pass* với ghi chú
   "tutor từ chối đúng"; người kia chấm *fail*. Đọc lại output thì tutor **không hề từ chối**
   — nó đưa luôn mẫu dataset, rubric và verdict. Đây là lỗi đọc lướt khi gán nhãn, và là bài
   học đắt nhất của buổi: **người chấm cũng là một hệ thống có failure mode.** Nếu chỉ có một
   người chấm, lỗi này đã lọt thẳng vào nhãn vàng và làm hỏng mọi con số phía sau.
-- **Cách nhóm xử lý:** không bỏ phiếu, mà **kiểm chứng lại**. 4 trong 9 bất đồng là sự thật
+- **Cách nhóm xử lý:** không bỏ phiếu trước, mà **kiểm chứng lại**. Những bất đồng là sự thật
   kiểm được bằng code (section có tồn tại không, quote có nằm trong section không) → chốt
   theo kết quả kiểm chứng chứ không theo ý kiến. 2 case còn mơ hồ thật sự (`sc-03` ví dụ
   không có nguồn, `sc-12` trả lời lệch câu hỏi) → giữ nguyên `uncertain` thay vì ép thành
   pass/fail. Nhãn vàng cuối: **14 pass / 4 fail / 2 uncertain**.
+- **Kiểm chéo lại nhãn vàng bằng bỏ phiếu:** majority vote của ba vòng tái tạo *đúng* nhãn
+  vàng — 18/20 case có đa số và khớp toàn bộ, 2 case không có đa số chính là 2 case để
+  `uncertain`. Hai cách làm độc lập ra cùng một kết quả, nên nhãn vàng không phải là ý kiến
+  của người chốt.
+- **Hạn chế của chính phép đo này:** cả ba vòng chấm đều có agent AI hỗ trợ (xem
+  `ai-support-log` của từng thành viên). Ba người đọc cùng một output bằng công cụ tương tự
+  nhau dễ hội tụ hơn ba người chấm tay thuần tuý — nên con số 50% có thể vẫn còn lạc quan.
 
 #### 3. LLM judge
 

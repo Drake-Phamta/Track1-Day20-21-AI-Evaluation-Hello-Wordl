@@ -1,4 +1,4 @@
-<!-- OWNER: Tuan Anh -- chi Tuan Anh duoc sua file nay. Ghep vao REPORT.md o T+125. -->
+<!-- OWNER: Tuan Anh -->
 
 ## 6. Scorecard & Gate
 
@@ -20,8 +20,9 @@ Nguồn số: `evidence/results-v1.jsonl` (20 row, tutor `gpt-4o-mini`, tool-cal
 | `groundedness` | LLM judge | 14 | 6 | 0 | 70% *(không đáng tin — xem mục 5)* |
 | **Nhãn tổng (người)** | Người | **14** | **4** | **2** | **70%** |
 
-Nhãn người là nhãn vàng chốt sau khi đối chiếu 2 vòng chấm độc lập (Hiếu, Tuấn Anh).
-Đồng thuận thô giữa 2 người chỉ **55%** — chi tiết ở mục 5.
+Nhãn người là nhãn vàng chốt sau khi đối chiếu **3 vòng chấm độc lập** (Chi, Hiếu, Tuấn Anh).
+Cả ba cùng nhãn ở 10/20 = **50%**; majority vote của ba vòng tái tạo đúng nhãn vàng này
+(18/20 case có đa số, khớp toàn bộ) — chi tiết ở mục 5.
 
 ### Bốn lỗi thật, phân theo ai bắt được
 
@@ -29,10 +30,10 @@ Nhãn người là nhãn vàng chốt sau khi đối chiếu 2 vòng chấm đ�
 
 | Case | Lỗi | Code bắt? | Judge bắt? | Người bắt? |
 |---|---|---|---|---|
-| `sc-05` | Cite `ai-evals-m09#what-to-judge-start-with-what-you-can-teach` — **section không tồn tại** | ✅ `citation_exists` | ❌ pass | ✅ (1/2 người) |
-| `sc-06` | Quote tiếng Việt gán cho `ai-evals-m05` — module viết tiếng **Anh**; tutor **dịch rồi trình bày như trích nguyên văn** | ✅ `quote_verbatim` | ❌ pass | ✅ (1/2 người) |
-| `sc-18` | Deixis ở slide s41 (*giao tiêu chí cho code hay judge*) nhưng tutor hiểu "routing" sang nghĩa orchestration của m12 (intent/SQL) — **lạc khái niệm** | ❌ | ✅ fail | ✅ (1/2 người) |
-| `sc-19` | **Làm hộ bài**: trả `in_scope` và đưa luôn mẫu dataset/rubric/verdict | ❌ | ❌ pass | ✅ (1/2 người) |
+| `sc-05` | Cite `ai-evals-m09#what-to-judge-start-with-what-you-can-teach` — **section không tồn tại** | ✅ `citation_exists` | ❌ pass | ✅ (2/3 người) |
+| `sc-06` | Quote tiếng Việt gán cho `ai-evals-m05` — module viết tiếng **Anh**; tutor **dịch rồi trình bày như trích nguyên văn** | ✅ `quote_verbatim` | ❌ pass | ✅ (2/3 người) |
+| `sc-18` | Deixis ở slide s41 (*giao tiêu chí cho code hay judge*) nhưng tutor hiểu "routing" sang nghĩa orchestration của m12 (intent/SQL) — **lạc khái niệm** | ❌ | ✅ fail | ✅ (2/3 người) |
+| `sc-19` | **Làm hộ bài**: trả `in_scope` và đưa luôn mẫu dataset/rubric/verdict | ❌ | ❌ pass | ✅ (2/3 người) |
 
 **Judge bắt đúng 1/4 = 25%.** Con số này trùng đến mức khó tin với chính slide `s55` nằm
 trong corpus của tutor: *"<25% bắt được output lỗi"*. Tài liệu mà tutor dùng để trả lời đã
@@ -85,6 +86,20 @@ thể chọn sai. Điểm 100% của v0 đo hạ tầng, không đo tutor.
 Bài học rút ra và mang đi được: **một cấu hình bị bó buộc sẽ cho điểm eval đẹp hơn mà không
 hề tốt hơn.** Khi so hai phiên bản, phải hỏi "phiên bản này có *cơ hội* mắc lỗi đó không"
 trước khi mừng vì pass rate tăng.
+
+### Bộ v2 xác nhận lại phát hiện trên câu hoàn toàn mới
+
+Mười câu v2 (`results-v2-gateway.jsonl`, chạy `gemma-4` pre-retrieve nên **không gộp vào
+scorecard trên**) cho cùng một hình dạng kết quả: `schema_valid` 10/10, `citation_exists`
+10/10, **`quote_verbatim` 4/10**, nhãn người 10/10 pass.
+
+Sáu case fail `quote_verbatim` đều là **ghép mẩu, không có case nào bịa** — kể cả hai câu
+được thiết kế riêng để ép bịa số (`sc-29` hỏi κ ≈ 0.45–0.52 và "33–41 điểm", `sc-30` hỏi
+TPR 5/7 = 71% và TNR 1/3 = 33%). Tutor lấy **đúng** mọi con số, chỉ viết lại câu văn quanh nó.
+
+Kết luận được củng cố: điểm yếu là **kỷ luật trích dẫn nguyên văn**, không phải groundedness.
+Cùng một failure mode xuất hiện trên hai bộ câu độc lập và hai model khác nhau → đây là vấn
+đề của contract và prompt, không phải đặc tính của một model cụ thể.
 
 ### Quyết định gate
 
