@@ -1,18 +1,35 @@
 # K3 Track 1 · Day 20–21 — AI Evaluation (eval-kit)
+**Thư mục bài nộp:** `Track1_Day21_01154_NguyenMinhHieu`
 
-Repo làm bài capstone **AI Evaluation** của case **VLearn AI Tutor** — trợ giảng trả lời
-câu hỏi học viên, chỉ dựa trên tài liệu khóa học, output là JSON
-`{scope, answer, sources, followup_questions}`.
+## 1. Thông tin cá nhân và nhóm
+- **Họ và tên:** Nguyễn Minh Hiếu (MHV: 01154)
+- **Nhóm:** Nhóm VLearn AI Tutor (Chi, Hiếu, Tuấn Anh)
 
-Đây là **môi trường chính của bài lab**: tutor thật (system prompt + tool-calling
-`kb_search`), corpus 18 tài liệu, vòng eval đầy đủ — chạy bằng Python trên máy bạn, dùng
-**API key của chính bạn** (OpenAI / DeepSeek / Gemini / Anthropic / OpenRouter).
-README này là hướng dẫn duy nhất: bước nào gõ lệnh gì, file nào ra file nào.
+## 2. Đóng góp của tôi
+- Phụ trách **Mục 3 (Rubric) và Mục 4 (Routing Map)**: Thiết kế rubric 5 tiêu chí và bảng routing phân loại việc nào cho code check, việc nào cho LLM judge, việc nào cho human.
+- Phụ trách **Mục 5 (Calibration)**: Thực hiện 2 vòng calibration, đính chính giới hạn của bộ nhãn (chỉ đo precision, chưa đo recall do không có case fail in-scope).
+- Chịu trách nhiệm thiết lập pipeline Code Checks tự động.
+- Gắn tracing Braintrust cho toàn bộ hệ thống.
 
-> **File lab tổng (kim chỉ nam, có timeline + rubric chấm):** đọc kèm
-> `day21-lab-ai-evaluation-capstone.md` do lớp phát.
+## 3. Sơ đồ sáu phase và artifact
+1. **Coverage:** `dataset-v1.jsonl` (20 câu hỏi phủ 5 intents và 4 nhóm user).
+2. **Baseline:** `labels.csv` (Nhãn độc lập 3 thành viên, agreement 85%).
+3. **Rubric & routing:** `REPORT.md` mục 3 & 4 (5 tiêu chí, routing cho code/LLM/human).
+4. **Calibration:** `judge-prompt-v1.md`, `judge-prompt-v2.md`, `verdicts-v1.jsonl`, `verdicts-v2.jsonl` (Tăng agreement LLM-Human từ 55% lên 70%).
+5. **Gate:** `06-scorecard.md` (Chốt threshold ≥90% cho các tiêu chí Blocker).
+6. **Verdict:** `REPORT.md` mục 7 (Quyết định HOLD dựa trên evidence).
 
-## Cấu trúc repo
+## 4. Verdict của nhóm và vì sao
+- **Quyết định:** **HOLD (Chưa Ship)**
+- **Vì sao:** Tiêu chí blocker `quote_verbatim` chỉ đạt **65%** (ngưỡng an toàn là ≥90%). Hệ thống có xu hướng dịch và paraphrase các đoạn trích dẫn thay vì copy-paste nguyên văn. Cần update `SYSTEM_PROMPT` và chạy test vòng 2.
+
+## 5. Điều mang về áp dụng cho dự án thật
+- **Pipeline Code Checks:** Luôn ưu tiên dùng script deterministic (như đếm số lượng, độ dài, kiểm tra ID tồn tại trong DB) thay vì phung phí token gọi LLM judge chấm những thứ máy có thể làm rẻ và chính xác 100%.
+- **Calibration Judge:** Không bao giờ tin LLM judge ngay từ đầu. Phải đo lường confusion matrix và sửa prompt từng chút một cho đến khi judge đồng thuận với chuẩn vàng của con người.
+
+---
+
+## Cấu trúc repo (Tham khảo)
 
 | Thư mục / file | Vai trò |
 |---|---|
@@ -22,6 +39,7 @@ README này là hướng dẫn duy nhất: bước nào gõ lệnh gì, file nà
 | `tests/` | `test_eval_kit.py` — 44 test offline (không tốn API), chạy trước khi làm bất cứ thứ gì |
 | `data/` | File mẫu: `dataset.example.jsonl` (5 câu đủ loại: in-scope, out-of-scope, mơ hồ, xin đáp án) và `labels.example.csv` (format nhãn người) |
 | root | File làm việc (scratch) bạn sinh ra khi chạy: `dataset.jsonl`, `results.jsonl`, `verdicts.jsonl`, `labels.csv`, `report.html` (đã gitignore, không commit) |
+
 
 **Mọi lệnh đều chạy từ root repo** (thư mục chứa README này). Luồng làm việc: file
 scratch sinh ra ở root → chốt một vòng thì copy vào `deliverables/evidence/`, đặt tên

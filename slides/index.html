@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>VLearn AI Tutor Evaluation</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .slide { background: #fff; width: 800px; height: 450px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 40px; box-sizing: border-box; display: none; }
+        .active { display: flex; flex-direction: column; }
+        h1 { color: #1a73e8; margin-top: 0; font-size: 32px; border-bottom: 2px solid #e8eaed; padding-bottom: 10px; }
+        ul { font-size: 24px; line-height: 1.6; color: #3c4043; }
+        .controls { margin-top: 20px; }
+        button { padding: 10px 20px; font-size: 16px; border: none; background: #1a73e8; color: #fff; border-radius: 4px; cursor: pointer; margin: 0 10px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .page-num { font-size: 14px; color: #5f6368; text-align: right; margin-top: auto; }
+    </style>
+</head>
+<body>
+
+    <div class="slide active" id="slide1">
+        <h1>1. Bối cảnh & Mục tiêu</h1>
+        <ul>
+            <li>Giới thiệu kết quả đánh giá (Eval loop) cho VLearn AI Tutor.</li>
+            <li>Đảm bảo hệ thống trả lời chính xác, tránh ảo giác.</li>
+            <li>Duy trì tính sư phạm: hỗ trợ nhưng không làm hộ bài.</li>
+        </ul>
+        <div class="page-num">1/14 - Chi</div>
+    </div>
+
+    <div class="slide" id="slide2">
+        <h1>2. Input Grid</h1>
+        <ul>
+            <li>**4 Nhóm người dùng:** HV mới, HV làm capstone, HV ôn lại, PM ngoài team.</li>
+            <li>**5 Intent chính:** Hỏi khái niệm, xin ví dụ, dejxis (mơ hồ), ngoài phạm vi, adversarial.</li>
+            <li>Tập trung rủi ro cao: Học viên capstone hỏi sai kiến thức cốt lõi.</li>
+        </ul>
+        <div class="page-num">2/14 - Chi</div>
+    </div>
+
+    <div class="slide" id="slide3">
+        <h1>3. Dataset v1 (20 câu)</h1>
+        <ul>
+            <li>60% in-scope (hỏi đúng trọng tâm corpus).</li>
+            <li>20% out-of-scope (kiểm tra kỷ luật từ chối).</li>
+            <li>10% mơ hồ (deixis) & 10% adversarial (prompt injection).</li>
+        </ul>
+        <div class="page-num">3/14 - Chi</div>
+    </div>
+
+    <div class="slide" id="slide4">
+        <h1>4. Rubric Đánh giá (5 Tiêu chí)</h1>
+        <ul>
+            <li>**Blockers:** Schema valid, Citation valid, Groundedness, Scope correct.</li>
+            <li>**Non-blocker:** Pedagogy (chất lượng câu hỏi follow-up).</li>
+            <li>Nguyên tắc: Sai 1 blocker = Fail toàn bộ câu trả lời.</li>
+        </ul>
+        <div class="page-num">4/14 - Chi</div>
+    </div>
+
+    <div class="slide" id="slide5">
+        <h1>5. Chiến lược Routing</h1>
+        <ul>
+            <li>**Code Checks:** Schema, độ dài quote, đếm số lượng follow-up, kiểm tra ID tồn tại.</li>
+            <li>**LLM Judge:** Chấm Groundedness và Scope.</li>
+            <li>**Human Review:** Pedagogy và Adversarial cases.</li>
+        </ul>
+        <div class="page-num">5/14 - Chi</div>
+    </div>
+
+    <div class="slide" id="slide6">
+        <h1>6. Human Baseline</h1>
+        <ul>
+            <li>Agreement vòng độc lập đạt **85%**.</li>
+            <li>Bất đồng tập trung ở tiêu chí Groundedness và Pedagogy.</li>
+            <li>Giải pháp: Siết chặt định nghĩa rubric để rõ ràng hơn.</li>
+        </ul>
+        <div class="page-num">6/14 - Chi</div>
+    </div>
+
+    <div class="slide" id="slide7">
+        <h1>7. LLM Judge - Calibration V1</h1>
+        <ul>
+            <li>Model: gpt-4o-mini.</li>
+            <li>Vấn đề V1: Judge quá nghiêm khắc với out-of-scope.</li>
+            <li>Lỗi: Đánh Fail tất cả các case có `sources=[]` dù từ chối hợp lệ.</li>
+        </ul>
+        <div class="page-num">7/14 - Hiếu</div>
+    </div>
+
+    <div class="slide" id="slide8">
+        <h1>8. LLM Judge - Calibration V2</h1>
+        <ul>
+            <li>Thay đổi duy nhất: Dạy judge rằng từ chối đúng + sources rỗng = PASS.</li>
+            <li>Kết quả: Agreement tăng từ 55% lên **70%**.</li>
+            <li>Vượt qua được rào cản false-negative của out-of-scope.</li>
+        </ul>
+        <div class="page-num">8/14 - Hiếu</div>
+    </div>
+
+    <div class="slide" id="slide9">
+        <h1>9. Giới hạn của bộ nhãn</h1>
+        <ul>
+            <li>Agreement 70% chỉ chứng minh judge "không fail oan".</li>
+            <li>Thực tế 12/12 câu in-scope đều được Tutor trả lời tốt.</li>
+            <li>Chưa có lỗi thật để đo "Recall" (khả năng bắt lỗi của judge).</li>
+        </ul>
+        <div class="page-num">9/14 - Hiếu</div>
+    </div>
+
+    <div class="slide" id="slide10">
+        <h1>10. Hiệu quả của Code Checks</h1>
+        <ul>
+            <li>Hoạt động song song với LLM Judge, độ trễ ~0s, chi phí 0đ.</li>
+            <li>Đóng vai trò chốt chặn cho các lỗi về Format và Hallucination của ID.</li>
+            <li>Phát hiện ra lỗi lớn nhất của tutor vòng này.</li>
+        </ul>
+        <div class="page-num">10/14 - Hiếu</div>
+    </div>
+
+    <div class="slide" id="slide11">
+        <h1>11. Scorecard (Tóm tắt)</h1>
+        <ul>
+            <li>Schema, Follow-up: 100% Pass.</li>
+            <li>Groundedness: 90% Pass.</li>
+            <li>**Quote Verbatim: Chỉ đạt 65% (Fail 7/20)**.</li>
+            <li>Lỗi: Tutor có xu hướng dịch/paraphrase thay vì copy-paste nguyên văn.</li>
+        </ul>
+        <div class="page-num">11/14 - Tuấn Anh</div>
+    </div>
+
+    <div class="slide" id="slide12">
+        <h1>12. Quyết định Gate</h1>
+        <ul>
+            <li>Ngưỡng yêu cầu cho các tiêu chí Blocker là **≥90%**.</li>
+            <li>Quote_verbatim (65%) vi phạm nghiêm trọng ngưỡng này.</li>
+            <li>**Verdict cuối cùng: HOLD (Không Ship).**</li>
+        </ul>
+        <div class="page-num">12/14 - Tuấn Anh</div>
+    </div>
+
+    <div class="slide" id="slide13">
+        <h1>13. Kế hoạch tiếp theo</h1>
+        <ul>
+            <li>Sửa đổi SYSTEM_PROMPT bắt buộc copy-paste 100%.</li>
+            <li>Thêm validate logic để đảm bảo section_id tồn tại.</li>
+            <li>Mục tiêu vòng sau: Nâng Quote_verbatim > 90%.</li>
+        </ul>
+        <div class="page-num">13/14 - Tuấn Anh</div>
+    </div>
+
+    <div class="slide" id="slide14">
+        <h1>14. Bài học mang về</h1>
+        <ul>
+            <li>Ưu tiên Code-based checks cho các điều kiện deterministic.</li>
+            <li>Tiết kiệm chi phí, không có độ trễ, và chính xác tuyệt đối so với LLM Judge.</li>
+            <li>Cảm ơn mọi người đã theo dõi!</li>
+        </ul>
+        <div class="page-num">14/14 - Tuấn Anh</div>
+    </div>
+
+    <div class="controls">
+        <button onclick="prev()" id="btnPrev" disabled>Previous</button>
+        <button onclick="next()" id="btnNext">Next</button>
+    </div>
+
+    <script>
+        let current = 1;
+        const total = 14;
+        function update() {
+            for(let i=1; i<=total; i++) {
+                document.getElementById('slide'+i).classList.remove('active');
+            }
+            document.getElementById('slide'+current).classList.add('active');
+            document.getElementById('btnPrev').disabled = (current === 1);
+            document.getElementById('btnNext').disabled = (current === total);
+        }
+        function next() { if(current < total) { current++; update(); } }
+        function prev() { if(current > 1) { current--; update(); } }
+    </script>
+</body>
+</html>
