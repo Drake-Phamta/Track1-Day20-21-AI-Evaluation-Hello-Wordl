@@ -126,6 +126,8 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; font-family:"IBM Ple
 .grid-tbl td{font-family:"IBM Plex Mono",monospace; font-size:11.5px; text-align:center}
 .grid-tbl td.hot{background:var(--failbg); color:var(--fail); font-weight:600}
 .grid-tbl td.freq{background:var(--warnbg); color:var(--warn); font-weight:600}
+.grid-tbl td.new{outline:1px dashed var(--rule2); outline-offset:-3px}
+.grid-tbl td i{font-style:italic; opacity:.75}
 .grid-tbl th:first-child,.grid-tbl td:first-child{
   text-align:left; font-family:"Be Vietnam Pro",sans-serif; font-weight:600; font-size:12.5px; color:var(--ink)
 }
@@ -292,16 +294,17 @@ select{
         <table class="grid-tbl">
           <thead><tr><th>Nhóm user</th><th>Khái niệm</th><th>Ví dụ</th><th>Deixis</th><th>Ngoài scope</th><th>Adversarial</th></tr></thead>
           <tbody>
-            <tr><td>Học viên mới</td><td class="freq">01,02</td><td>03</td><td>—</td><td>13</td><td>—</td></tr>
-            <tr><td>Làm capstone</td><td class="hot">04,06,08</td><td class="freq">05,07</td><td class="hot">17</td><td>16</td><td class="hot">19,20</td></tr>
-            <tr><td>Ôn lại</td><td>09</td><td>10</td><td>18</td><td>14</td><td>—</td></tr>
-            <tr><td>PM ngoài team</td><td>11</td><td>12</td><td>—</td><td class="hot">15</td><td>—</td></tr>
+            <tr><td>Học viên mới</td><td class="freq">01,02</td><td>03</td><td class="new">21</td><td>13</td><td class="new">22</td></tr>
+            <tr><td>Làm capstone</td><td class="hot">04,06,08,<i>27,29</i></td><td class="freq">05,07</td><td class="hot">17,<i>28</i></td><td>16</td><td class="hot">19,20</td></tr>
+            <tr><td>Ôn lại</td><td>09,<i>30</i></td><td>10</td><td>18</td><td>14</td><td class="new">23</td></tr>
+            <tr><td>PM ngoài team</td><td>11,<i>26</i></td><td>12</td><td class="new">24</td><td class="hot">15</td><td class="hot new">25</td></tr>
           </tbody>
         </table>
       </div>
       <div style="display:flex;flex-direction:column;gap:11px">
-        <p><span class="tag t-fail">đỏ</span> ô rủi ro cao &nbsp; <span class="tag t-unc">vàng</span> ô tần suất cao</p>
-        <p>Phủ <strong>15/20 ô</strong>. Năm ô trống bỏ có chủ đích: học viên mới chưa đủ vốn để prompt-inject, PM không ngồi trước slide nên không hỏi deixis.</p>
+        <p><span class="tag t-fail">đỏ</span> rủi ro cao &nbsp; <span class="tag t-unc">vàng</span> tần suất cao &nbsp; <i>nghiêng</i> = câu thêm ở v2</p>
+        <p>Phủ <strong>20/20 ô</strong> sau vòng v2.</p>
+        <div class="note" style="border-left-color:var(--fail)"><b>Chúng tôi từng kết luận vội.</b> Ở v1 lưới chỉ phủ 15/20, và chúng tôi viết rằng 5 ô trống là “tổ hợp không thực tế”. Sai — nhất là ô <i>học viên mới × deixis</i>: người mới chính là nhóm hỏi trống không nhiều nhất. Cả 5 ô lấp ở v2 đều hoá ra là câu hỏi thật.</div>
         <div class="note"><b>Biến bị loại:</b> độ dài câu hỏi, có dấu / không dấu, cách xưng hô. Tutor phải trả lời như nhau → không tạo khác biệt hành vi → không phải dimension.</div>
       </div>
     </div>
@@ -312,6 +315,7 @@ select{
 <section class="slide">
   <div class="eyebrow">Phase 1 · Dataset v1</div>
   <h2>20 câu, chọn theo rủi ro chứ không theo tần suất</h2>
+  <p class="dim mono" style="font-size:11px;letter-spacing:.08em;flex:none">BỘ CHÍNH — MỌI SỐ VERDICT TÍNH TRÊN BỘ NÀY</p>
   <div class="body">
     <div class="row4">
       <div class="stat"><div class="k">In-scope</div><div class="v">12</div><div class="s">việc chính của tutor</div></div>
@@ -335,6 +339,35 @@ select{
 </section>
 
 <!-- 6 -->
+<section class="slide">
+  <div class="eyebrow">Phase 1 · Dataset v2</div>
+  <h2>Đóng đúng những chỗ báo cáo tự khai là thiếu</h2>
+  <div class="body">
+    <p class="lead">Mười câu thêm không phải để cho đủ số. Mỗi câu bịt một lỗ mà chính bản v1 đã ghi vào phần blind spot — cách duy nhất để mở rộng dataset mà vẫn giải thích được.</p>
+    <div class="cols c2">
+      <div class="tw">
+        <table>
+          <thead><tr><th style="width:64px">Câu</th><th>Đóng chỗ nào</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">21–25</td><td>5 ô lưới bỏ trống ở v1</td></tr>
+            <tr><td class="mono">26</td><td>Câu hỏi <b>tiếng Anh</b></td></tr>
+            <tr><td class="mono">27</td><td>Hai nguồn nói khác nhau — kiêm phép dò retrieval</td></tr>
+            <tr><td class="mono">28</td><td>Hỏi nối tiếp (multi-turn)</td></tr>
+            <tr><td class="mono">29–30</td><td><b>Ép kiểm trích dẫn</b>: hỏi đúng số liệu cụ thể</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div class="stat"><div class="k">quote_verbatim trên bộ v2</div><div class="v">4<span style="font-size:19px">/10</span></div><div class="s">6 case fail — <b>0 case bịa</b>, tất cả đều là ghép mẩu</div></div>
+        <div class="note"><b>Hai câu ép bịa số đều thất bại trong việc làm tutor bịa.</b> <span class="mono">sc-29</span> hỏi κ ≈ 0.45–0.52 và “33–41 điểm”; <span class="mono">sc-30</span> hỏi TPR 5/7 = 71% và TNR 1/3 = 33%. Tutor lấy <b>đúng</b> mọi con số, chỉ viết lại câu văn quanh nó.</div>
+        <div class="note" style="border-left-color:var(--rule2)">Cùng một failure mode trên hai bộ câu độc lập và hai model khác nhau → đây là vấn đề của <b>contract</b>, không phải đặc tính của một model.</div>
+      </div>
+    </div>
+    <div class="note" style="border-left-color:var(--fail)"><b>Phát hiện phụ, nhưng lớn:</b> <span class="mono">chip-huyen-ch4</span> là tài liệu lớn nhất corpus (123k ký tự) nhưng chỉ được truy ra <b>1/129 lượt</b> — vì nó bị cắt thành 15 khối trung bình 8.213 ký tự, gấp 8 lần mọi doc khác, và BM25 phạt độ dài. Ba tài liệu tham chiếu thật cộng lại chỉ 4,7% số lượt; slide chiếm 49%. <b>Tutor đang trả lời gần như hoàn toàn từ slide bài giảng.</b></div>
+  </div>
+</section>
+
+<!-- 7 -->
 <section class="slide">
   <div class="eyebrow">Phase 3 · Rubric</div>
   <h2>Năm tiêu chí, bốn cái là blocker</h2>
@@ -383,9 +416,9 @@ select{
   <h2>Người chấm cũng là một hệ thống có lỗi</h2>
   <div class="body">
     <div class="row3">
-      <div class="stat"><div class="k">Đồng thuận thô</div><div class="v">55%</div><div class="s">11/20 — hai người chấm độc lập<div class="bar b-fail"><i style="width:55%"></i></div></div></div>
-      <div class="stat"><div class="k">Case bất đồng</div><div class="v">9</div><div class="s">4 giải được bằng kiểm chứng, 2 giữ nguyên uncertain</div></div>
-      <div class="stat"><div class="k">Nhãn vàng</div><div class="v mono" style="font-size:22px">14 / 4 / 2</div><div class="s">pass / fail / uncertain</div></div>
+      <div class="stat"><div class="k">Cả ba cùng nhãn</div><div class="v">50%</div><div class="s">10/20 — ba vòng chấm độc lập<div class="bar b-fail"><i style="width:50%"></i></div></div></div>
+      <div class="stat"><div class="k">Ba mức khắt khe</div><div class="v mono" style="font-size:17px">0 · 4 · 6</div><div class="s">số case fail của Hiếu · Tuấn Anh · Chi</div></div>
+      <div class="stat"><div class="k">Nhãn vàng</div><div class="v mono" style="font-size:22px">14 / 4 / 2</div><div class="s">pass / fail / uncertain — majority vote 3 vòng tái tạo đúng bộ này</div></div>
     </div>
     <div class="note" style="border-left-color:var(--fail)">
       <b>Mâu thuẫn lớn nhất — <span class="mono">sc-19</span>, câu xin đáp án capstone.</b><br>
@@ -393,6 +426,7 @@ select{
       Đọc lại output: tutor <b>không hề từ chối</b> — nó đưa luôn mẫu dataset, mẫu rubric, mẫu verdict.
     </div>
     <p class="lead">Nếu chỉ một người chấm, lỗi đọc lướt này đã lọt thẳng vào nhãn vàng và làm hỏng mọi con số phía sau — kể cả agreement của judge.</p>
+    <div class="note" style="border-left-color:var(--rule2)"><b>Tự soi phép đo của chính mình:</b> cả ba vòng chấm đều có agent AI hỗ trợ. Ba người đọc cùng một output bằng công cụ giống nhau dễ hội tụ hơn ba người chấm tay thuần tuý — nên con số 50% có thể vẫn còn <i>lạc quan</i>.</div>
     <p><strong>Cách nhóm xử lý:</strong> không bỏ phiếu, mà kiểm chứng lại. 4/9 bất đồng là sự thật kiểm được bằng code (section có tồn tại không, quote có nằm trong section không) → chốt theo kiểm chứng. 2 case mơ hồ thật sự thì giữ nguyên <span class="mono">uncertain</span> thay vì ép thành pass/fail.</p>
   </div>
 </section>
@@ -484,6 +518,7 @@ select{
       <button id="nextC">sau →</button>
       <select id="pick"></select>
       <button id="onlyFail">chỉ xem 4 case fail</button>
+      <button id="setFilter">bộ: tất cả 30</button>
       <span id="cmeta" class="mono" style="font-size:11px;color:var(--ink3)"></span>
     </div>
     <div class="card" id="card"></div>
@@ -564,7 +599,8 @@ select{
   });
 
   /* ---------- slide demo ---------- */
-  var all = D.cases, view = all, ci = 0, failOnly = false;
+  var all = D.cases, view = all, ci = 0, failOnly = false, setMode = 0;
+  var SETS = [null, "v1", "v2"], SETLBL = ["bộ: tất cả 30", "bộ: v1 (20 câu)", "bộ: v2 (10 câu)"];
   var pick = document.getElementById("pick");
   var card = document.getElementById("card");
   var cmeta = document.getElementById("cmeta");
@@ -591,10 +627,15 @@ select{
     var c = view[ci];
     if (!c){ card.innerHTML = ""; return; }
     pick.value = String(ci);
-    cmeta.textContent = (ci + 1) + "/" + view.length + " · " + c.lat + "s · $" +
-      Number(c.cost).toFixed(5) + " · kb_search ×" + c.kb;
+    cmeta.textContent = (ci + 1) + "/" + view.length + " · " + c.lat + "s · " +
+      (c.cost == null ? "gateway $0" : "$" + Number(c.cost).toFixed(5)) +
+      " · kb_search ×" + c.kb;
 
     var h = "";
+    h += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:2px">';
+    h += '<span class="tag ' + (c.set === "v2" ? "t-unc" : "t-pass") + '">' +
+         (c.set === "v2" ? "v2 · gemma-4 pre-retrieve" : "v1 · gpt-4o-mini agentic") + "</span>";
+    h += '<span class="mono" style="font-size:10.5px;color:var(--ink3)">' + esc(c.id) + "</span></div>";
     h += '<div class="qline">' + esc(c.q) + "</div>";
     if (c.slide) h += '<div class="slidectx">slide context: ' + esc(c.slide) + "</div>";
     h += '<div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">';
@@ -628,11 +669,23 @@ select{
   document.getElementById("prevC").onclick = function(){ go(ci - 1); };
   document.getElementById("nextC").onclick = function(){ go(ci + 1); };
   pick.onchange = function(){ go(parseInt(pick.value, 10)); };
+  function applyFilters(){
+    var f = SETS[setMode];
+    view = all.filter(function(c){
+      return (!failOnly || c.hum === "fail") && (!f || c.set === f);
+    });
+    if (!view.length) view = all;
+    ci = 0; fillPick(); render();
+  }
   document.getElementById("onlyFail").onclick = function(){
     failOnly = !failOnly;
-    this.textContent = failOnly ? "xem lại cả 20 case" : "chỉ xem 4 case fail";
-    view = failOnly ? all.filter(function(c){ return c.hum === "fail"; }) : all;
-    ci = 0; fillPick(); render();
+    this.textContent = failOnly ? "xem lại mọi case" : "chỉ xem 4 case fail";
+    applyFilters();
+  };
+  document.getElementById("setFilter").onclick = function(){
+    setMode = (setMode + 1) % 3;
+    this.textContent = SETLBL[setMode];
+    applyFilters();
   };
 
   fillPick(); render(); show(0);
