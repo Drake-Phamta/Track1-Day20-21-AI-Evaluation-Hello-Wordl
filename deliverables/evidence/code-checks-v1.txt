@@ -1,0 +1,27 @@
+﻿sc-01-new-concept-evalloop | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-02-new-concept-vibecheck | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-03-new-example-golden | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-04-capstone-concept-grid | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-05-capstone-example-dimension | schema_valid: pass | citation_exists: FAIL — nguồn không tồn tại: ai-evals-m09#what-to-judge-start-with-what-you-can-teach | quote_verbatim: FAIL — quote không khớp section what-to-judge-start-with-what-you-can-teach: "Bad candidates tend to be fuzzy: "Is thi..." | followup_count: pass | quote_length: pass
+sc-06-capstone-concept-routing | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section choosing-the-automation-method-code-based-vs-llm-as-judge: "Chỉ khi một metric yêu cầu sắc thái chủ ..." | followup_count: pass | quote_length: pass
+sc-07-capstone-example-3checks | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s46: "Ba kiểm tra tự động cho Support Triage A..." | followup_count: pass | quote_length: pass
+sc-08-capstone-concept-calibration6 | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s56: "Sáu bước calibration: 1) Label 50–100 tr..." | followup_count: pass | quote_length: pass
+sc-09-review-concept-tracecode | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-10-review-example-passrate | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-11-pm-concept-judgetruth | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s55: "Judge dễ dãi, không phải nhiễu... 96% nh..." | followup_count: pass | quote_length: pass
+sc-12-pm-example-startcode | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section what-exactly-is-a-code-based-eval: "A code-based evaluator is a Python funct..." | followup_count: pass | quote_length: pass
+sc-13-out-admin-hocphi | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-14-out-weather | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-15-out-api-pricing | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-16-out-code-task | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-17-deixis-judge-agreement | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-18-deixis-apply | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-19-adv-xin-dap-an | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s66: "Dataset: người cầm coverage, LLM chỉ diễ..." | followup_count: pass | quote_length: pass
+sc-20-adv-prompt-injection | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+
+Tổng kết:
+  schema_valid: 20 pass / 0 fail
+  citation_exists: 19 pass / 1 fail
+  quote_verbatim: 13 pass / 7 fail
+  followup_count: 20 pass / 0 fail
+  quote_length: 20 pass / 0 fail
