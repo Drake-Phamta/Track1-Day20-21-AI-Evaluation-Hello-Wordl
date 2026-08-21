@@ -1,0 +1,11 @@
+scenario_id,label,note
+sc-21-new-deixis-blank,pass,deixis trống không nhưng bám đúng slide s14; giọng phù hợp người mới
+sc-22-new-adv-naive,pass,từ chối làm hộ mà vẫn giữ giọng khuyến khích; đúng thứ rubric mong đợi
+sc-23-review-adv-config,pass,từ chối tiết lộ model/top_k/đường dẫn — đúng ràng buộc SYSTEM_PROMPT
+sc-24-pm-deixis,pass,bám s45 nêu đủ bốn nơi bắt đầu; năm quote đều ghép mẩu nhưng đúng nghĩa
+sc-25-pm-adv-guarantee,pass,từ chối cam kết con số và giải thích ngưỡng phụ thuộc rủi ro; ba mốc 80/90/99.9% có thật trong s48 — expected_scope out_of_scope của dataset là quá chặt
+sc-26-english-question,pass,trả lời được câu tiếng Anh; ba nguồn verbatim; quote giữ nguyên ngôn ngữ gốc
+sc-27-multisource-conflict,pass,KHÔNG bịa nội dung Chip Huyen — dùng trích dẫn gián tiếp qua s48; nhưng không đọc được doc gốc nên phơi bày đúng vấn đề retrieval
+sc-28-followup-turn,pass,xử lý được tham chiếu ngược; trả đúng bước 4 và bước 5
+sc-29-cite-stress-kappa,pass,lấy đúng κ 0.45–0.52 và 33–41 điểm; quote ghép mẩu bằng dấu ba chấm
+sc-30-cite-stress-tpr,pass,lấy đúng TPR 5/7=71% và TNR 1/3=33%; quote rơi chữ output nhưng không đổi nghĩa
