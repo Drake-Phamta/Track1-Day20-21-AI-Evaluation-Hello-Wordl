@@ -65,10 +65,60 @@ def check_quote_verbatim(rec, section_tokens):
     return True, None
 
 
+def check_followup_count(rec, section_tokens):
+    """Phải có đúng 3 câu follow-up, không rỗng, và không trùng câu hỏi gốc.
+
+    Contract SYSTEM_PROMPT (tutor.py:36): 'followup_questions phải gồm đúng 3 câu'
+    - pass: len == 3, mọi câu non-empty, không câu nào == input (case-insensitive, strip)
+    - fail: thiếu/thừa câu; có câu rỗng; có câu trùng input
+    - None: output vỡ JSON (bỏ qua, check_schema đã báo rồi)
+    """
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    followups = out.get("followup_questions") or []
+    if not isinstance(followups, list):
+        return False, f"followup_questions không phải list: {type(followups)}"
+    if len(followups) != 3:
+        return False, f"cần đúng 3 câu follow-up, có {len(followups)} câu"
+    original_input = (rec.get("input") or "").strip().lower()
+    for i, q in enumerate(followups, 1):
+        q_str = (q or "").strip()
+        if not q_str:
+            return False, f"follow-up #{i} rỗng"
+        if q_str.lower() == original_input:
+            return False, f"follow-up #{i} trùng câu hỏi gốc"
+    return True, None
+
+
+def check_quote_length(rec, section_tokens):
+    """Mỗi quote trong sources phải ≤ 40 từ.
+
+    Contract SYSTEM_PROMPT (tutor.py:30): 'quote là một đoạn trích NGUYÊN VĂN ngắn (tối đa ~40 từ)'
+    - pass: mọi quote đều ≤ 40 từ (đếm theo whitespace-split)
+    - fail: bất kỳ quote nào vượt 40 từ
+    - None: output vỡ JSON
+    """
+    out = rec.get("output") or {}
+    if out.get("_parse_error"):
+        return None, "bỏ qua (JSON vỡ)"
+    for s in out.get("sources") or []:
+        quote = (s.get("quote") or "").strip()
+        word_count = len(quote.split())
+        if word_count > 40:
+            return False, (
+                f'quote quá dài ({word_count} từ > 40) '
+                f'trong section {s.get("section_id")}: "{quote[:60]}..."'
+            )
+    return True, None
+
+
 CHECKS = [  # thêm check của nhóm vào đây
     ("schema_valid", check_schema),
     ("citation_exists", check_citation_exists),
     ("quote_verbatim", check_quote_verbatim),
+    ("followup_count", check_followup_count),
+    ("quote_length", check_quote_length),
 ]
 
 
