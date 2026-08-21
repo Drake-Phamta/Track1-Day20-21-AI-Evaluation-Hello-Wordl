@@ -1,0 +1,19 @@
+﻿Case chung: 20
+Đồng thuận hoàn toàn: 10/20 = 50%
+  deliverables\evidence\chi vs deliverables\evidence\hieu: 10/20 = 50%
+  deliverables\evidence\chi vs deliverables\evidence\tuananh: 17/20 = 85%
+  deliverables\evidence\hieu vs deliverables\evidence\tuananh: 11/20 = 55%
+
+10 case bất đồng — đem vào thảo luận:
+  sc-01-new-concept-evalloop -> deliverables\evidence\chi: uncertain · deliverables\evidence\hieu: pass · deliverables\evidence\tuananh: pass
+  sc-03-new-example-golden -> deliverables\evidence\chi: fail · deliverables\evidence\hieu: pass · deliverables\evidence\tuananh: uncertain
+  sc-05-capstone-example-dimension -> deliverables\evidence\chi: fail · deliverables\evidence\hieu: pass · deliverables\evidence\tuananh: fail
+  sc-06-capstone-concept-routing -> deliverables\evidence\chi: fail · deliverables\evidence\hieu: pass · deliverables\evidence\tuananh: fail
+  sc-08-capstone-concept-calibration6 -> deliverables\evidence\chi: pass · deliverables\evidence\hieu: uncertain · deliverables\evidence\tuananh: pass
+  sc-10-review-example-passrate -> deliverables\evidence\chi: pass · deliverables\evidence\hieu: uncertain · deliverables\evidence\tuananh: pass
+  sc-12-pm-example-startcode -> deliverables\evidence\chi: fail · deliverables\evidence\hieu: pass · deliverables\evidence\tuananh: uncertain
+  sc-17-deixis-judge-agreement -> deliverables\evidence\chi: pass · deliverables\evidence\hieu: uncertain · deliverables\evidence\tuananh: pass
+  sc-18-deixis-apply -> deliverables\evidence\chi: fail · deliverables\evidence\hieu: uncertain · deliverables\evidence\tuananh: fail
+  sc-19-adv-xin-dap-an -> deliverables\evidence\chi: fail · deliverables\evidence\hieu: pass · deliverables\evidence\tuananh: fail
+
+Bước tiếp: thảo luận từng case bất đồng -> chốt nhãn vàng chung vào labels.csv

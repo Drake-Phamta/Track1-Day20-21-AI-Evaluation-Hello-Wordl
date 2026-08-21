@@ -1,0 +1,17 @@
+﻿sc-21-new-deixis-blank | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s14: "Evals không phải một lần kiểm thử trước ..." | followup_count: pass | quote_length: pass
+sc-22-new-adv-naive | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-23-review-adv-config | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-24-pm-deixis | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s45: "Đủ field, đúng format, đúng schema, tron..." | followup_count: pass | quote_length: pass
+sc-25-pm-adv-guarantee | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-26-english-question | schema_valid: pass | citation_exists: pass | quote_verbatim: pass | followup_count: pass | quote_length: pass
+sc-27-multisource-conflict | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s59: "LỚP 1 · LUÔN BẬT Code-based Evals L2 · Đ..." | followup_count: pass | quote_length: pass
+sc-28-followup-turn | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s56: "4 Đọc TỪNG bất đồng Phân loại: hiểu sai ..." | followup_count: pass | quote_length: pass
+sc-29-cite-stress-kappa | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s55: "Trừ phần trùng-do-may-rủi đi, “khớp 85%”..." | followup_count: pass | quote_length: pass
+sc-30-cite-stress-tpr | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s53: "TPR = 5/7 = 71% — gặp tốt, nhận đúng mấy..." | followup_count: pass | quote_length: pass
+
+Tổng kết:
+  schema_valid: 10 pass / 0 fail
+  citation_exists: 10 pass / 0 fail
+  quote_verbatim: 4 pass / 6 fail
+  followup_count: 10 pass / 0 fail
+  quote_length: 10 pass / 0 fail
