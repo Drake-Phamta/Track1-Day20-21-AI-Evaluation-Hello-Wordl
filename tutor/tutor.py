@@ -86,6 +86,15 @@ PROVIDERS = {
 BASE_URL = os.environ.get("EVAL_BASE_URL")  # None = gọi thẳng provider
 MODEL = os.environ.get("EVAL_MODEL", "deepseek/deepseek-v4-flash")
 
+# Không phải endpoint nào cũng nhận `tools`: vLLM chưa bật --enable-auto-tool-choice
+# + --tool-call-parser sẽ trả 400 cho mọi request có tool_choice. Khi gặp, tutor tự
+# chuyển sang chế độ pre-retrieve (BM25 trước, nhét kết quả vào prompt) thay vì chết —
+# cùng nguồn, cùng contract output, chỉ khác ai quyết định truy vấn. Ép sẵn: EVAL_NO_TOOLS=1.
+NO_TOOLS = os.environ.get("EVAL_NO_TOOLS", "").strip().lower() not in ("", "0", "false")
+
+class ToolsUnsupported(RuntimeError):
+    """Provider từ chối request có `tools` — caller nên chạy lại ở chế độ pre-retrieve."""
+
 def resolve_provider(model):
     """-> (base_url, api_key, model_id_thật). Gateway nếu EVAL_BASE_URL được đặt."""
     if BASE_URL:
@@ -209,6 +218,12 @@ def chat(messages, model=None, temperature=0, max_tokens=800, tools=None):
     for attempt in range(3):  # gateway/provider thỉnh thoảng trả body JSON bị cắt ngang (200 nhưng không parse được) — retry
         resp = requests.post(base_url + "/chat/completions", json=payload, timeout=120,
                              headers={"Authorization": "Bearer " + key})
+        # Endpoint không bật tool-calling: 400 + thông báo nhắc tool. Bật cờ toàn cục để
+        # các câu sau đi thẳng pre-retrieve, khỏi tốn thêm một request hỏng mỗi câu.
+        if resp.status_code == 400 and tools and "tool" in (resp.text or "").lower():
+            global NO_TOOLS
+            NO_TOOLS = True
+            raise ToolsUnsupported(resp.text[:300])
         resp.raise_for_status()
         try:
             return resp.json(), time.time() - t0
@@ -277,10 +292,44 @@ def kb_search_local(query, max_results=5, sections=None):
         "source_count": len(hits),
     }
 
+# --- Dự phòng khi endpoint không hỗ trợ tool-calling: retrieve TRƯỚC rồi hỏi một lượt.
+# --- Khác vòng agentic ở chỗ truy vấn do code đặt chứ không phải model tự đặt; mọi thứ
+# --- còn lại (nguồn, contract JSON, shape của meta) giữ nguyên để downstream không đổi.
+def answer_pre_retrieved(question, slide=None, corpus_sections=None, max_results=5):
+    query = question
+    if slide:  # câu deixis ("chỗ này là gì") tự thân không đủ từ khoá để BM25 bắt trúng
+        query = " ".join(x for x in (question, slide.get("keyword"), slide.get("title")) if x)
+    result = kb_search_local(query, max_results=max_results, sections=corpus_sections)
+    tool_log = [{"query": result["query"],
+                 "hits": ["%s#%s" % (r["doc_id"], r["section_id"]) for r in result["results"]]}]
+    retrieved = [{"doc_id": r["doc_id"], "section_id": r["section_id"]}
+                 for r in result["results"]]
+
+    user = (format_slide_context(slide) + "Câu hỏi của học viên: " + question
+            + "\n\nKết quả kb_search (nguồn DUY NHẤT được phép dùng để trả lời):\n"
+            + json.dumps(result, ensure_ascii=False))
+    data, latency = chat([{"role": "system", "content": SYSTEM_PROMPT},
+                          {"role": "user", "content": user}],
+                         max_tokens=2000, tools=None)
+    choice = data["choices"][0]
+    content = choice["message"].get("content") or ""
+    out = parse_json_content(content)
+    finish = choice.get("finish_reason")
+    if finish == "length":
+        out.setdefault("_truncated", True)
+    usage = {k: v for k, v in (data.get("usage") or {}).items()
+             if isinstance(v, (int, float))}
+    meta = {"raw_content": content, "usage": usage, "latency_s": round(latency, 2),
+            "finish_reason": finish, "steps": 1, "tool_calls": tool_log,
+            "retrieved": retrieved, "mode": "pre_retrieve"}
+    return out, meta
+
 # --- Hàm chính: vòng agentic y hệt platform — model TỰ gọi kb_search (có thể
 # --- nhiều lần, nhiều truy vấn) rồi mới trả JSON theo contract
 def call_tutor(question, slide=None, max_steps=6):
     corpus_sections = load_corpus()
+    if NO_TOOLS:  # đã biết endpoint không nhận tools — khỏi thử lại cho tốn request
+        return answer_pre_retrieved(question, slide, corpus_sections)
     user = format_slide_context(slide) + "Câu hỏi của học viên: " + question
     messages = [{"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user}]
@@ -290,8 +339,11 @@ def call_tutor(question, slide=None, max_steps=6):
     for step in range(max_steps):
         # Vòng cuối: rút tools đi để ép model trả lời (và ép JSON) dù nó còn muốn gọi
         last_round = step == max_steps - 1
-        data, latency = chat(messages, max_tokens=2000,
-                             tools=None if last_round else [KB_SEARCH_TOOL])
+        try:
+            data, latency = chat(messages, max_tokens=2000,
+                                 tools=None if last_round else [KB_SEARCH_TOOL])
+        except ToolsUnsupported:  # phát hiện ở câu đầu tiên — chuyển hẳn sang pre-retrieve
+            return answer_pre_retrieved(question, slide, corpus_sections)
         latency_total += latency
         u = data.get("usage", {})
         for k, v in u.items():

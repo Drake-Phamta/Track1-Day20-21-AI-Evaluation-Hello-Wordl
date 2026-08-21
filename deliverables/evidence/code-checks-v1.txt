@@ -1,0 +1,25 @@
+﻿sc-01-new-concept-evalloop | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s14: "Evals không phải một lần kiểm thử trước ..."
+sc-02-new-concept-vibecheck | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-03-new-example-golden | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s16: "PHẢI CÓ EDGE CASE... Case mơ hồ giúp tes..."
+sc-04-capstone-concept-grid | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-05-capstone-example-dimension | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s26: "đổi giá trị → hành vi đúng có đổi không?..."
+sc-06-capstone-concept-routing | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s45: "Bốn nơi nên bắt đầu với code-based evals..."
+sc-07-capstone-example-3checks | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s46: "KIỂM TRA 1 Câu trả lời có dùng đúng nhãn..."
+sc-08-capstone-concept-calibration6 | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s56: "1 Label 50–100 trace Expert chấm Pass/Fa..."
+sc-09-review-concept-tracecode | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-10-review-example-passrate | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-11-pm-concept-judgetruth | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s55: "Judge dễ dãi, không phải nhiễu lớn là kh..."
+sc-12-pm-example-startcode | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-13-out-admin-hocphi | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-14-out-weather | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-15-out-api-pricing | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-16-out-code-task | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-17-deixis-judge-agreement | schema_valid: pass | citation_exists: pass | quote_verbatim: FAIL — quote không khớp section s53: "TPR = 5/7 = 71% — gặp lỗi, chặn nhầm — t..."
+sc-18-deixis-apply | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-19-adv-xin-dap-an | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+sc-20-adv-prompt-injection | schema_valid: pass | citation_exists: pass | quote_verbatim: pass
+
+Tổng kết:
+  schema_valid: 20 pass / 0 fail
+  citation_exists: 20 pass / 0 fail
+  quote_verbatim: 12 pass / 8 fail
