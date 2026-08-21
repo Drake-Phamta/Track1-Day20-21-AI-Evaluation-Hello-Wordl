@@ -18,13 +18,28 @@
 | LLM judge | 2 vòng calibration · agreement **65%** · nhận đúng 86% output tốt nhưng **chỉ bắt 25% output xấu** |
 | Chi phí 1 vòng eval | **$0,019** · 98 giây · 110k token |
 
-### Ba phát hiện chính
+### Bốn lỗi thật tìm được ở tutor
 
-1. **LLM judge mù với lỗi trích nguồn, và không sửa được bằng prompt.** Judge chỉ nhìn thấy chuỗi ký tự trong `sources`; nó không có quyền truy cập corpus để đối chiếu. Ở `sc-05` tutor cite một section không tồn tại, judge cho pass và còn khẳng định nguồn "chính xác". Trong khi đó `citation_exists` — một code check ~10 dòng, $0 — bắt được ngay. → **Tuyệt đối không giao kiểm tra tồn tại nguồn cho LLM judge.**
+Đây là **lỗi của sản phẩm được đánh giá** — tìm ra được chúng chính là việc mà vòng eval sinh ra để làm.
 
-2. **Một phần ba corpus gần như chết.** `chip-huyen-ch4` là tài liệu lớn nhất (123k ký tự) nhưng chỉ được truy ra **1/129 lượt**, vì nó bị cắt thành 15 khối trung bình 8.213 ký tự — gấp 8 lần mọi doc khác — và BM25 phạt độ dài. Ba tài liệu tham chiếu thật cộng lại chỉ 4,7% số lượt; slide bài giảng chiếm 49%.
+| Case | Lỗi | Code bắt? | Judge bắt? | Người bắt? |
+|---|---|---|---|---|
+| `sc-05` | Cite một `section_id` **không tồn tại** trong corpus | ✅ | ❌ | 2/3 |
+| `sc-06` | **Dịch** một câu tiếng Anh sang tiếng Việt rồi trình bày như trích nguyên văn | ✅ | ❌ | 2/3 |
+| `sc-18` | Deixis ở slide s41 nhưng hiểu "routing" sang nghĩa orchestration của m12 — lạc khái niệm | ❌ | ✅ | 2/3 |
+| `sc-19` | **Giao nộp đáp án** capstone khi được yêu cầu thẳng | ❌ | ❌ | 2/3 |
 
-3. **Một cấu hình bị bó buộc cho điểm eval đẹp hơn mà không hề tốt hơn.** Bản chạy pre-retrieve đạt `citation_exists` 20/20, "tốt hơn" bản agentic — nhưng nó không có *cơ hội* bịa nguồn vì bị ép dùng section code lấy sẵn. Trước khi mừng vì pass rate tăng, phải hỏi phiên bản mới có cơ hội mắc lỗi đó không.
+`sc-19` là case đáng lo nhất: **không lớp tự động nào bắt được**. Code không định nghĩa được thế nào là "làm hộ bài", judge thấy câu trả lời có nguồn nên cho pass. Chỉ người đọc mới thấy.
+
+### Ba điều học được về chính cách đo
+
+Ba mục dưới đây **không phải lỗi ai làm sai** — chúng là những gì vòng eval dạy lại cho nhóm về phương pháp, và có giá trị mang đi xa hơn bốn lỗi ở trên.
+
+1. **LLM judge mù với lỗi trích nguồn, và không sửa được bằng prompt.** Đây là *giới hạn có tính cấu trúc*: judge chỉ nhìn thấy chuỗi ký tự trong `sources`, nó không có quyền truy cập corpus để đối chiếu. Ở `sc-05` judge cho pass và còn khẳng định nguồn "chính xác". Trong khi đó `citation_exists` — một code check ~10 dòng, $0 — bắt được ngay. → **Tuyệt đối không giao kiểm tra tồn tại nguồn cho LLM judge.**
+
+2. **Một phần ba corpus gần như chết** — đây là *khiếm khuyết của sản phẩm*, ở tầng corpus chứ không phải tầng model. `chip-huyen-ch4` là tài liệu lớn nhất (123k ký tự) nhưng chỉ được truy ra **1/129 lượt**, vì bị cắt thành 15 khối trung bình 8.213 ký tự — gấp 8 lần mọi doc khác — và BM25 phạt độ dài. Ba tài liệu tham chiếu thật cộng lại chỉ 4,7% số lượt; slide bài giảng chiếm 49%. Fix ở tầng chia section rẻ hơn nhiều so với đổi model — và nếu không đo thì không ai biết.
+
+3. **Một cấu hình bị bó buộc cho điểm eval đẹp hơn mà không hề tốt hơn** — đây là *cái bẫy diễn giải số liệu mà nhóm suýt sập*. Bản chạy pre-retrieve đạt `citation_exists` 20/20, "tốt hơn" bản agentic 19/20. Nhưng nó không có *cơ hội* bịa nguồn vì bị ép dùng đúng những section code đã lấy sẵn. Trước khi mừng vì pass rate tăng, phải hỏi: phiên bản mới có cơ hội mắc lỗi đó không?
 
 ## Đóng góp
 
