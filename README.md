@@ -1,5 +1,6 @@
 # Track1 · Day 21 — Capstone AI Evaluation · VLearn AI Tutor
 
+**Người nộp:** Nguyễn Minh Hiếu · **MHV:** 2A202601154 · **Vai trò:** Rubric & Judge Lead
 **Nhóm:** Nguyễn Ngọc Chi · Nguyễn Minh Hiếu · Phạm Tuấn Anh
 **Sản phẩm được đánh giá:** VLearn AI Tutor — trợ giảng RAG, tool-calling `kb_search` trên corpus 18 tài liệu, output JSON `{scope, answer, sources, followup_questions}`.
 
@@ -49,19 +50,25 @@ Ba mục dưới đây **không phải lỗi ai làm sai** — chúng là nhữn
 | **Nguyễn Minh Hiếu** | Rubric & Judge Lead | Rubric 5 tiêu chí và routing map (mục 3–4); 2 code check bổ sung trong `eval/code_checks.py`; 2 vòng calibrate judge (mục 5); `results-v1` chạy agentic thật |
 | **Phạm Tuấn Anh** | Pipeline & Integration Lead | Khung làm việc chống conflict (`_parts/` + `assemble_report.py`); vá `tutor.py` fallback khi endpoint không hỗ trợ tool-calling; vòng chấm nhãn độc lập; dựng nhãn vàng; scorecard và verdict (mục 6–7); tích hợp và ghép REPORT |
 
-## Nộp bài
+## Đóng góp của tôi
 
-Mỗi thành viên có một nhánh riêng, **checkout là nộp được, không phải sửa gì thêm**:
+- Chốt **rubric 5 tiêu chí** (`schema_valid`, `citation_valid`, `groundedness`,
+  `scope_correct`, `pedagogy`) với 4 tiêu chí blocker, kèm định nghĩa pass/fail cho từng cái
+  — mục 3 của REPORT.
+- Thiết kế **routing map**: tiêu chí nào giao code, cái nào giao LLM judge, cái nào giữ cho
+  người, kèm lý giải dựa trên số liệu — mục 4.
+- Viết thêm **2 code check** vào `eval/code_checks.py` (`check_followup_count`,
+  `check_quote_length`) đúng signature `(rec, section_tokens)`, giữ 44/44 test pass.
+- Chạy **`results-v1`** — bộ kết quả chuẩn của cả bài, tutor `gpt-4o-mini` với tool-calling
+  thật (6/20 câu gọi `kb_search` hai lần).
+- **Hai vòng calibrate judge** (`judge-prompt-v1.md` → `v2.md`, `verdicts-v1/v2.jsonl`) và
+  phân tích confusion matrix từng vòng — mục 5.
+- Một vòng **chấm nhãn độc lập** trên 20 câu (`evidence/labels-hieu.csv`).
 
-```bash
-git checkout nop/chi        # Nguyễn Ngọc Chi   · 2A202602024
-git checkout nop/hieu       # Nguyễn Minh Hiếu  · 2A202601154
-git checkout nop/tuananh    # Phạm Tuấn Anh     · 2A202601840
-```
-
-Rồi đổi tên thư mục thành `Track1_Day21_<MHV>_<HọVàTên>` và nộp.
-
-Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); `deliverables/`, `slides/` và toàn bộ code giống hệt nhau.
+**Phát hiện tôi đóng góp cho kết luận chung:** vòng calibrate v1 đánh trượt oan cả 4 câu
+out-of-scope mà tutor xử lý đúng, vì judge coi `sources = []` là "không grounded". Sửa đúng
+một thứ ở v2 — định nghĩa rõ out-of-scope với sources rỗng vẫn là pass — làm ba case lật
+sang đúng. Đây là ví dụ cụ thể cho nguyên tắc "sửa ít một thứ mỗi vòng, rồi đo lại".
 
 ## Đường vào bài nộp
 
@@ -71,7 +78,7 @@ Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); 
 | Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 20 file |
 | Slides thuyết trình | [slides/index.html](slides/index.html) — mở bằng double-click, phím ← → |
 | Kịch bản nói | [slides/speaker-notes.md](slides/speaker-notes.md) |
-| Dùng AI ở đâu, AI sai ở đâu | `ai-support-log-<tên>.md` ở thư mục gốc |
+| Dùng AI ở đâu, AI sai ở đâu | [ai-support-log.md](ai-support-log.md) |
 | Tài liệu quy trình làm việc | [process/](process/) — kế hoạch sprint và phân công |
 
 ## Chạy lại từ đầu
