@@ -98,7 +98,7 @@ Dùng `python`, **không phải `python3`**. Mọi lệnh chạy từ thư mục
 
 1. **Judge trùng model với tutor** (đều `gpt-4o-mini`) — hạ tầng nhóm chỉ có một model khả dụng. Vi phạm nguyên tắc "judge phải khác tutor"; mọi số liệu judge phải đọc kèm cảnh báo tự chấm chéo.
 2. **Bộ v2 chạy cấu hình khác bộ v1** (`gemma-4` pre-retrieve vs `gpt-4o-mini` agentic) nên số liệu để riêng, không gộp vào verdict.
-3. **Chưa gắn tracing Braintrust/LangSmith.** Code đã sẵn sàng (`eval/tracing.py` tự nhận backend), chỉ thiếu API key.
+3. **Tracing chưa chứng minh được bằng evidence.** Project Braintrust đã tạo (link trong `evidence/braintrust-link.md`) và hạ tầng `eval/tracing.py` hoàn chỉnh, nhưng `results-v1.jsonl` — bộ chuẩn của toàn bộ scorecard — chạy trước khi có key nên không có trace, và nhóm chủ động không chạy lại vì sẽ làm hỏng nhãn vàng. Đây là mục checklist duy nhất không hoàn thành trọn vẹn.
 4. **n = 20 là quá nhỏ** để tin từng con số phần trăm — một case đổi nhãn là pass rate nhảy 5%.
 5. **Không có câu hỏi nào từ người dùng thật** — cả 30 câu do nhóm hoặc LLM sinh.
 

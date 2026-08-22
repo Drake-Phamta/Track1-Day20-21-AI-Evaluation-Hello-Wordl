@@ -221,3 +221,21 @@ toàn độc lập — con số đồng thuận 50% ở trên có thể vẫn c�
 tay thuần tuý. Điều này không làm hỏng kết luận về judge (vì nhãn vàng đã được kiểm chứng
 bằng code ở những case quyết định), nhưng nó là lý do để không tự tin thái quá vào con số
 agreement giữa người với người.
+
+### Đo recall cho tử tế ở vòng sau
+
+Con số 25% ở trên tính trên **4 case fail** — quá ít để tin. Vấn đề gốc: dataset này khiến
+tutor hầu như không mắc lỗi groundedness rõ ràng, nên nhãn vàng thiếu case xấu để judge phải
+bắt. Chờ tutor tự sai đủ nhiều là cách chậm và bị động.
+
+Hai cách chủ động, xếp theo độ rẻ:
+
+1. **Inject output xấu nhân tạo.** Lấy 5–10 row từ `results-v1.jsonl`, sửa tay để tạo lỗi
+   groundedness rõ ràng — đổi `section_id` thành mã không tồn tại, thay quote bằng câu bịa,
+   thêm một khẳng định không có trong sources — rồi gán nhãn `fail` và chạy judge trên bộ đã
+   trộn. Đây là cách duy nhất đo được recall mà không phải chờ. Chi phí gần như bằng không.
+2. **Lấy mẫu từ trace thật.** Khi tutor có người dùng, sample 10%/tuần và gán nhãn ngẫu nhiên.
+   Chậm hơn nhưng phản ánh đúng phân bố lỗi thật thay vì lỗi do nhóm nghĩ ra.
+
+Nguyên tắc rút ra: **bộ nhãn vàng cần được thiết kế để chứa case xấu, không phải để tình cờ
+có case xấu.** Nếu không, mọi con số recall đều là ước lượng trên mẫu quá nhỏ.
