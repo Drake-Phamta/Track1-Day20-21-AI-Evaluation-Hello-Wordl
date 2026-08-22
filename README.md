@@ -1,5 +1,6 @@
 # Track1 · Day 21 — Capstone AI Evaluation · VLearn AI Tutor
 
+**Người nộp:** Nguyễn Ngọc Chi · **MHV:** 2A202602024 · **Vai trò:** Dataset & Coverage Lead → Slides
 **Nhóm:** Nguyễn Ngọc Chi · Nguyễn Minh Hiếu · Phạm Tuấn Anh
 **Sản phẩm được đánh giá:** VLearn AI Tutor — trợ giảng RAG, tool-calling `kb_search` trên corpus 18 tài liệu, output JSON `{scope, answer, sources, followup_questions}`.
 
@@ -49,19 +50,25 @@ Ba mục dưới đây **không phải lỗi ai làm sai** — chúng là nhữn
 | **Nguyễn Minh Hiếu** | Rubric & Judge Lead | Rubric 5 tiêu chí và routing map (mục 3–4); 2 code check bổ sung trong `eval/code_checks.py`; 2 vòng calibrate judge (mục 5); `results-v1` chạy agentic thật |
 | **Phạm Tuấn Anh** | Pipeline & Integration Lead | Khung làm việc chống conflict (`_parts/` + `assemble_report.py`); vá `tutor.py` fallback khi endpoint không hỗ trợ tool-calling; vòng chấm nhãn độc lập; dựng nhãn vàng; scorecard và verdict (mục 6–7); tích hợp và ghép REPORT |
 
-## Nộp bài
+## Đóng góp của tôi
 
-Mỗi thành viên có một nhánh riêng, **checkout là nộp được, không phải sửa gì thêm**:
+- Thiết kế **Input Grid 4×5** (4 nhóm người dùng × 5 ý định), chọn dimension theo tiêu chí
+  "đổi giá trị thì hành vi đúng có đổi không" và loại các biến không tạo khác biệt hành vi.
+- Sinh **dataset v1 (20 câu)** và **dataset v2 mở rộng (10 câu)** → phủ đủ 20/20 ô.
+  Mười câu v2 đóng đúng những blind spot mà chính bản v1 đã tự khai là thiếu.
+- **Kiểm retrieval offline trước khi tốn một đồng API** (`tutor.retrieve_corpus()`):
+  14/14 câu v1 và 6/6 câu v2 có gắn slide đều truy đúng slide dự kiến trong top-4.
+- Một vòng **chấm nhãn độc lập** trên 20 câu (`evidence/labels-chi.csv`) và toàn bộ nhãn
+  bộ v2 (`evidence/labels-v2-gateway.csv`).
+- Viết **mục 1 (Input Grid)** và **mục 2 (Dataset)** của REPORT — gồm cả phần tự phê về
+  lập luận sai "5 ô trống là tổ hợp không thực tế" ở vòng v1.
+- Dựng toàn bộ **deck 14 slide** (`slides/`) sinh tự động từ `evidence/`, và
+  **speaker notes** chia lời cho ba người.
 
-```bash
-git checkout nop/chi        # Nguyễn Ngọc Chi   · 2A202602024
-git checkout nop/hieu       # Nguyễn Minh Hiếu  · 2A202601154
-git checkout nop/tuananh    # Phạm Tuấn Anh     · 2A202601840
-```
-
-Rồi đổi tên thư mục thành `Track1_Day21_<MHV>_<HọVàTên>` và nộp.
-
-Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); `deliverables/`, `slides/` và toàn bộ code giống hệt nhau.
+**Phát hiện tôi đóng góp cho kết luận chung:** `chip-huyen-ch4` — tài liệu lớn nhất corpus
+(123k ký tự) — chỉ được truy ra 1/129 lượt, vì nó bị cắt thành 15 khối trung bình 8.213 ký tự
+và BM25 phạt độ dài. Ba tài liệu tham chiếu thật cộng lại chỉ chiếm 4,7% số lượt truy xuất,
+trong khi slide bài giảng chiếm 49%. Tutor đang trả lời gần như hoàn toàn từ slide.
 
 ## Đường vào bài nộp
 
@@ -71,7 +78,7 @@ Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); 
 | Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 20 file |
 | Slides thuyết trình | [slides/index.html](slides/index.html) — mở bằng double-click, phím ← → |
 | Kịch bản nói | [slides/speaker-notes.md](slides/speaker-notes.md) |
-| Dùng AI ở đâu, AI sai ở đâu | `ai-support-log-<tên>.md` ở thư mục gốc |
+| Dùng AI ở đâu, AI sai ở đâu | [ai-support-log.md](ai-support-log.md) |
 | Tài liệu quy trình làm việc | [process/](process/) — kế hoạch sprint và phân công |
 
 ## Chạy lại từ đầu
