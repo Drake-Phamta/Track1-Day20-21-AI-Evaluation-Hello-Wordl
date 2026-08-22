@@ -1,5 +1,6 @@
 # Track1 · Day 21 — Capstone AI Evaluation · VLearn AI Tutor
 
+**Người nộp:** Phạm Tuấn Anh · **MHV:** 2A202601840 · **Vai trò:** Pipeline & Integration Lead
 **Nhóm:** Nguyễn Ngọc Chi · Nguyễn Minh Hiếu · Phạm Tuấn Anh
 **Sản phẩm được đánh giá:** VLearn AI Tutor — trợ giảng RAG, tool-calling `kb_search` trên corpus 18 tài liệu, output JSON `{scope, answer, sources, followup_questions}`.
 
@@ -49,19 +50,25 @@ Ba mục dưới đây **không phải lỗi ai làm sai** — chúng là nhữn
 | **Nguyễn Minh Hiếu** | Rubric & Judge Lead | Rubric 5 tiêu chí và routing map (mục 3–4); 2 code check bổ sung trong `eval/code_checks.py`; 2 vòng calibrate judge (mục 5); `results-v1` chạy agentic thật |
 | **Phạm Tuấn Anh** | Pipeline & Integration Lead | Khung làm việc chống conflict (`_parts/` + `assemble_report.py`); vá `tutor.py` fallback khi endpoint không hỗ trợ tool-calling; vòng chấm nhãn độc lập; dựng nhãn vàng; scorecard và verdict (mục 6–7); tích hợp và ghép REPORT |
 
-## Nộp bài
+## Đóng góp của tôi
 
-Mỗi thành viên có một nhánh riêng, **checkout là nộp được, không phải sửa gì thêm**:
+- Dựng **khung làm việc chống conflict** cho ba người: tách `REPORT.md` thành 7 file
+  `deliverables/_parts/` có chủ sở hữu riêng, cùng `assemble_report.py` ghép lại bằng một
+  lệnh và cờ `--check` báo mục nào còn placeholder.
+- Vá **`tutor/tutor.py`**: thêm `ToolsUnsupported` + `answer_pre_retrieved()` để tutor tự
+  chuyển sang chế độ pre-retrieve khi endpoint trả 400 cho request có `tools`, giữ nguyên
+  contract để mọi thứ downstream không đổi. 44/44 test vẫn pass.
+- Một vòng **chấm nhãn độc lập** (`evidence/labels-tuananh.csv`), rồi **dựng nhãn vàng**
+  bằng cách kiểm chứng lại các case bất đồng thay vì bỏ phiếu.
+- Viết **mục 6 (Scorecard & Gate)** và **mục 7 (Verdict)** — gồm bảng "bốn lỗi thật, ai bắt
+  được cái nào" là căn cứ cho routing map, và bảng đối chứng agentic vs pre-retrieve.
+- **Tích hợp**: merge các nhánh, ghép REPORT hoàn chỉnh, rà số liệu khớp với evidence.
 
-```bash
-git checkout nop/chi        # Nguyễn Ngọc Chi   · 2A202602024
-git checkout nop/hieu       # Nguyễn Minh Hiếu  · 2A202601154
-git checkout nop/tuananh    # Phạm Tuấn Anh     · 2A202601840
-```
-
-Rồi đổi tên thư mục thành `Track1_Day21_<MHV>_<HọVàTên>` và nộp.
-
-Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); `deliverables/`, `slides/` và toàn bộ code giống hệt nhau.
+**Phát hiện tôi đóng góp cho kết luận chung:** bản chạy pre-retrieve đạt `citation_exists`
+20/20, "tốt hơn" bản agentic 19/20. Nhưng đó là kết luận sai — nó không có *cơ hội* bịa nguồn
+vì bị ép dùng đúng những section code đã lấy sẵn. Một cấu hình bị bó buộc sẽ cho điểm eval
+đẹp hơn mà không hề tốt hơn; trước khi mừng vì pass rate tăng phải hỏi phiên bản mới có cơ
+hội mắc lỗi đó không.
 
 ## Đường vào bài nộp
 
@@ -71,7 +78,7 @@ Ba nhánh chỉ khác nhau đúng 2 file (`README.md` và `ai-support-log.md`); 
 | Data thô từng bước | [deliverables/evidence/](deliverables/evidence/) — 20 file |
 | Slides thuyết trình | [slides/index.html](slides/index.html) — mở bằng double-click, phím ← → |
 | Kịch bản nói | [slides/speaker-notes.md](slides/speaker-notes.md) |
-| Dùng AI ở đâu, AI sai ở đâu | `ai-support-log-<tên>.md` ở thư mục gốc |
+| Dùng AI ở đâu, AI sai ở đâu | [ai-support-log.md](ai-support-log.md) |
 | Tài liệu quy trình làm việc | [process/](process/) — kế hoạch sprint và phân công |
 
 ## Chạy lại từ đầu
